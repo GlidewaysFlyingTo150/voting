@@ -1,1 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Glideways Annual Awards — Voting</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="card">
+    <h1>Glideways Annual Awards — Vote</h1>
+    <p id="status">Please sign in with Discord to vote.</p>
+
+    <button id="loginBtn" class="btn">Login with Discord</button>
+
+    <div id="votingSection" hidden>
+      <h2>Cast your votes (one per category)</h2>
+      <form id="voteForm">
+        <div class="category">
+          <label> Cafes/restaurant Overall
+            <select name="Cafes/restaurant Overall" required>
+              <option value="">— choose —</option>
+              <option>a</option>
+              <option>b</option>
+              <option>c</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="category">
+          <label> Aviation
+            <select name="Aviation" required>
+              <option value="">— choose —</option>
+              <option>a</option>
+              <option>b</option>
+              <option>c</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="category">
+          <label> Most active
+            <select name="Most active" required>
+              <option value="">— choose —</option>
+              <option>a</option>
+              <option>b</option>
+              <option>c</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="category">
+          <label> Most enthusiastic
+            <select name="Most enthusiastic" required>
+              <option value="">— choose —</option>
+              <option>a</option>
+              <option>b</option>
+              <option>c</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="category">
+          <label> Most known
+            <select name="Most known" required>
+              <option value="">— choose —</option>
+              <option>a</option>
+              <option>b</option>
+              <option>c</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="category">
+          <label> People's favorites
+            <select name="People's favorites" required>
+              <option value="">— choose —</option>
+              <option>a</option>
+              <option>b</option>
+              <option>c</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="actions">
+          <button id="submitVote" class="btn primary">Submit Votes</button>
+        </div>
+      </form>
+      <p id="voteResult" class="muted"></p>
+    </div>
+
+    <footer class="muted small">Glideways — Annual Awards</footer>
+  </main>
+
+<script src="script.js"></script>
+</body>
+</html>
 
