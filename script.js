@@ -1,5 +1,5 @@
 // --- Configuration you will update ---
-const APPS_SCRIPT_BASE = 'https://script.google.com/macros/s/YOUR_DEPLOY_ID/exec'; 
+const APPS_SCRIPT_BASE = 'https://script.google.com/macros/s/AKfycbzlz1r5uKY9OMRoCLw1sNsGmRaUtPFiNetseujoh0qw1gPgxSCWguphaPITNxYmqmgN/exec'; 
 // Replace YOUR_DEPLOY_ID later with your Apps Script web app URL
 // ----------------------------------------------------------------
 
