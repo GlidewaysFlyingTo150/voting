@@ -1,0 +1,40 @@
+:root{
+  --bg:#eaf7fc;
+  --glass: rgba(255,255,255,0.55);
+  --accent1: #0ea5a4; /* emerald-ish */
+  --accent2: #60a5fa; /* sky-ish */
+  --text: #03303a;
+  --card-w: 760px;
+}
+*{box-sizing:border-box;font-family:"Trebuchet MS",sans-serif}
+html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#f6fbff);}
+body{display:flex;align-items:center;justify-content:center;padding:24px;color:var(--text)}
+.card{
+  width:100%;
+  max-width:var(--card-w);
+  background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.45));
+  backdrop-filter: blur(8px) saturate(120%);
+  border-radius:18px;padding:28px;
+  box-shadow: 0 10px 30px rgba(3,48,58,0.08);
+  text-align:center;
+}
+h1{margin:0 0 8px;font-size:1.6rem}
+h2{margin-top:6px;font-size:1.1rem;color:var(--text)}
+.muted{color:rgba(3,48,58,0.6)}
+.small{font-size:0.85rem}
+.btn{
+  border:0;padding:10px 14px;border-radius:10px;background:transparent;
+  cursor:pointer;margin:8px 0;font-weight:600;
+  border:1px solid rgba(3,48,58,0.08)
+}
+.btn.primary{
+  background:linear-gradient(90deg,var(--accent1),var(--accent2));
+  color:white;border:0;
+  box-shadow: 0 6px 18px rgba(96,165,250,0.18);
+}
+.category{margin:10px 0;text-align:left}
+.category label{display:block}
+select{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(3,48,58,0.06)}
+.actions{margin-top:14px}
+#status{margin-bottom:12px}
+#voteResult{margin-top:10px}
