@@ -5,39 +5,10 @@
   <title>Logging in...</title>
 </head>
 <body>
-  <h1>Logging in with Discord...</h1>
-
+  <h1>Logging in with Google...</h1>
   <script>
-    async function handleCallback() {
-      const params = new URLSearchParams(window.location.search);
-      const code = params.get("code");
-
-      if (!code) {
-        document.body.innerHTML = "<p>Error: No code provided.</p>";
-        return;
-      }
-
-      try {
-        const response = await fetch("/auth", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code })
-        });
-
-        const data = await response.json();
-        if (data.success) {
-          // Save token in localStorage (or cookies)
-          localStorage.setItem("discord_token", data.access_token);
-          window.location.href = "/index.html"; // Redirect back to main page
-        } else {
-          document.body.innerHTML = `<p>Error: ${data.error}</p>`;
-        }
-      } catch (err) {
-        document.body.innerHTML = `<p>Fetch error: ${err}</p>`;
-      }
-    }
-
-    handleCallback();
+    // This page is just a placeholder; Apps Script already stores token in localStorage and redirects
+    // You could optionally show a loading animation or message here
   </script>
 </body>
 </html>
