@@ -1,17 +1,42 @@
-<script>
-fetch("YOUR_SCRIPT_URL")
-    .then(res => res.json())
-    .then(data => {
-        const container = document.getElementById("results");
-        container.innerHTML = "";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Glideways Voting Results</title>
+<link rel="stylesheet" href="styles.css">
 
-        for (const [name, count] of Object.entries(data)) {
-            container.innerHTML += `
-                <div class="vote-result">
-                    <h2>${name}</h2>
-                    <p>${count} votes</p>
-                </div>
-            `;
-        }
-    });
+<script>
+async function loadResults() {
+    document.getElementById("loading").style.display = "flex";
+
+    const res = await fetch("YOUR_GOOGLE_SCRIPT_URL_HERE");
+    const data = await res.json();
+
+    document.getElementById("loading").style.display = "none";
+
+    document.getElementById("a-count").innerText = data.A;
+    document.getElementById("b-count").innerText = data.B;
+    document.getElementById("c-count").innerText = data.C;
+}
 </script>
+
+</head>
+
+<body onload="loadResults()">
+
+<div class="container">
+    <h1 class="title">Voting Results</h1>
+
+    <div class="result-box">
+        <p><strong>Option A:</strong> <span id="a-count">0</span></p>
+        <p><strong>Option B:</strong> <span id="b-count">0</span></p>
+        <p><strong>Option C:</strong> <span id="c-count">0</span></p>
+    </div>
+
+    <a href="index.html" class="results-link">← Back</a>
+</div>
+
+<div id="loading"><div class="spinner"></div></div>
+
+</body>
+</html>
