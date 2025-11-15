@@ -1,40 +1,94 @@
-:root{
-  --bg:#eaf7fc;
-  --glass: rgba(255,255,255,0.55);
-  --accent1: #0ea5a4; /* emerald-ish */
-  --accent2: #60a5fa; /* sky-ish */
-  --text: #03303a;
-  --card-w: 760px;
+/* --- General reset --- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Trebuchet MS', sans-serif;
 }
-*{box-sizing:border-box;font-family:"Trebuchet MS",sans-serif}
-html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#f6fbff);}
-body{display:flex;align-items:center;justify-content:center;padding:24px;color:var(--text)}
-.card{
-  width:100%;
-  max-width:var(--card-w);
-  background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.45));
-  backdrop-filter: blur(8px) saturate(120%);
-  border-radius:18px;padding:28px;
-  box-shadow: 0 10px 30px rgba(3,48,58,0.08);
-  text-align:center;
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  background: linear-gradient(135deg, #4bd1c6, #7ed5ff); /* Glideways green/blue gradient */
+  color: #fff;
+  padding: 20px;
 }
-h1{margin:0 0 8px;font-size:1.6rem}
-h2{margin-top:6px;font-size:1.1rem;color:var(--text)}
-.muted{color:rgba(3,48,58,0.6)}
-.small{font-size:0.85rem}
-.btn{
-  border:0;padding:10px 14px;border-radius:10px;background:transparent;
-  cursor:pointer;margin:8px 0;font-weight:600;
-  border:1px solid rgba(3,48,58,0.08)
+
+/* --- Glassy container --- */
+.container {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  padding: 30px 40px;
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  margin-top: 50px;
 }
-.btn.primary{
-  background:linear-gradient(90deg,var(--accent1),var(--accent2));
-  color:white;border:0;
-  box-shadow: 0 6px 18px rgba(96,165,250,0.18);
+
+/* --- Headings --- */
+h1, h2 {
+  margin-bottom: 25px;
+  color: #ffffff;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.35);
 }
-.category{margin:10px 0;text-align:left}
-.category label{display:block}
-select{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(3,48,58,0.06)}
-.actions{margin-top:14px}
-#status{margin-bottom:12px}
-#voteResult{margin-top:10px}
+
+/* --- Buttons --- */
+button {
+  background: linear-gradient(135deg, #00ffab, #00d4ff); /* Glow style */
+  border: none;
+  border-radius: 12px;
+  padding: 12px 25px;
+  margin: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+
+button:hover {
+  filter: brightness(1.15);
+  transform: translateY(-2px);
+}
+
+/* --- User info --- */
+#user-info {
+  margin-bottom: 20px;
+  font-weight: bold;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+
+/* --- Voting buttons container --- */
+#voting-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* --- Vote results list --- */
+#vote-list {
+  list-style: none;
+  margin-top: 20px;
+  padding: 0;
+}
+
+#vote-list li {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 12px 20px;
+  margin: 6px 0;
+  border-radius: 12px;
+  text-align: center;
+  transition: background 0.3s ease;
+  font-weight: bold;
+}
+
+#vote-list li:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
