@@ -1,95 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Glideways Voting</title>
-<link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <title>Glideways Voting</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
 
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+<div class="container">
+
+    <!-- LOGIN BOX -->
+    <div id="loginBox" class="glass-box fade">
+        <h2>Sign in to Vote</h2>
+
+        <div id="g_id_onload"
+             data-client_id="232951174632-hkb769otpi9k5re4avti8mv3vamsg7hk.apps.googleusercontent.com"
+             data-callback="handleCredentialResponse"
+             data-auto_prompt="false">
+        </div>
+
+        <div class="g_id_signin"
+             data-type="standard"
+             data-size="large"
+             data-theme="outline"
+             data-text="sign_in_with"
+             data-shape="rect"
+             data-logo_alignment="left">
+        </div>
+    </div>
+
+
+    <!-- VOTING BOX -->
+    <div id="voteBox" class="glass-box fade hidden">
+        <h2>Cast Your Vote</h2>
+
+        <form id="voteForm">
+            <label class="option">
+                <input type="radio" name="vote" value="Option A" required>
+                Option A
+            </label>
+
+            <label class="option">
+                <input type="radio" name="vote" value="Option B" required>
+                Option B
+            </label>
+
+            <label class="option">
+                <input type="radio" name="vote" value="Option C" required>
+                Option C
+            </label>
+
+            <button type="submit" id="submitBtn">Submit Vote</button>
+
+            <div id="loading" class="spinner hidden"></div>
+            <div id="successMessage" class="success hidden">Vote Submitted!</div>
+        </form>
+    </div>
+
+</div>
 
 <script>
-let userEmail = null; 
+// 🔵 Google Login
+let userEmail = "";
 
 function handleCredentialResponse(response) {
-    const jwt = parseJwt(response.credential);
-    userEmail = jwt.email;
+    const data = parseJwt(response.credential);
+    userEmail = data.email;
 
-    document.getElementById("login-section").style.display = "none";
-    document.getElementById("vote-section").style.display = "block";
+    document.getElementById("loginBox").classList.add("hidden");
+    document.getElementById("voteBox").classList.remove("hidden");
 }
 
 function parseJwt(token) {
     return JSON.parse(atob(token.split('.')[1]));
 }
 
-async function submitVote(option) {
-    document.getElementById("loading").style.display = "flex";
+// 🔵 Voting handler
+document.getElementById("voteForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const choice = document.querySelector("input[name='vote']:checked").value;
+    const loading = document.getElementById("loading");
+    const success = document.getElementById("successMessage");
+    const submitBtn = document.getElementById("submitBtn");
+
+    loading.classList.remove("hidden");
+    submitBtn.disabled = true;
 
     try {
         await fetch("https://script.google.com/macros/s/AKfycbwJklZ2sMbKJ6gCnmIvF7FJECSryGNX4xBHE10U42jq-pHTO9rj1GOvJG5cMf2BcP9k/exec", {
             method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({
-                email: userEmail,
-                vote: option
-            })
+            mode: "no-cors",
+            body: new FormData(document.getElementById("voteForm"))
         });
 
-        document.getElementById("loading").style.display = "none";
-        const msg = document.getElementById("success-message");
-        msg.style.opacity = "1";
+        loading.classList.add("hidden");
+        success.classList.remove("hidden");
 
-        setTimeout(() => msg.style.opacity = "0", 2500);
+        setTimeout(() => success.classList.add("fade-out"), 1500);
 
-    } catch (e) {
-        alert("Error submitting vote.");
+    } catch (err) {
+        alert("There was an error submitting your vote.");
+        loading.classList.add("hidden");
     }
-}
+});
 </script>
-
-</head>
-
-<body>
-
-<div class="container">
-
-    <!-- LOGIN -->
-    <div id="login-section">
-        <h1 class="title">Glideways Voting</h1>
-        <div id="g_id_onload"
-            data-client_id="232951174632-hkb769otpi9k5re4avti8mv3vamsg7hk.apps.googleusercontent.com"
-            data-callback="handleCredentialResponse">
-        </div>
-
-        <div class="g_id_signin" 
-            data-type="standard"
-            data-shape="pill"
-            data-theme="outline"
-            data-text="signin_with"
-            data-size="large">
-        </div>
-    </div>
-
-    <!-- VOTING -->
-    <div id="vote-section" style="display: none;">
-        <h2 class="subtitle">Cast Your Vote</h2>
-
-        <button class="vote-btn" onclick="submitVote('Option A')">Option A</button>
-        <button class="vote-btn" onclick="submitVote('Option B')">Option B</button>
-        <button class="vote-btn" onclick="submitVote('Option C')">Option C</button>
-
-        <a href="results.html" class="results-link">View Results →</a>
-    </div>
-
-    <!-- SUCCESS MESSAGE -->
-    <div id="success-message">✔ Vote Submitted!</div>
-
-    <!-- LOADING SPINNER -->
-    <div id="loading">
-        <div class="spinner"></div>
-    </div>
-
-</div>
 
 </body>
 </html>
