@@ -1,38 +1,17 @@
-<!doctype html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>Glideways Awards — Vote Totals</title>
-<link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <main class="card">
-    <h1>Current Vote Totals</h1>
-    <div id="results"></div>
-    <footer class="muted small">Glideways — Annual Awards</footer>
-  </main>
-
 <script>
-// UPDATE this to match script.js:
-const APPS_SCRIPT_BASE = 'https://script.google.com/macros/s/YOUR_DEPLOY_ID/exec';
+fetch("YOUR_SCRIPT_URL")
+    .then(res => res.json())
+    .then(data => {
+        const container = document.getElementById("results");
+        container.innerHTML = "";
 
-async function loadTotals(){
-  const res = await fetch(`${APPS_SCRIPT_BASE}?action=totals`);
-  const data = await res.json();
-  const out = document.getElementById('results');
-
-  let html = '';
-  for (const category in data){
-    html += `<h2>${category}</h2><ul>`;
-    for (const choice in data[category]){
-      html += `<li><strong>${choice}</strong>: ${data[category][choice]}</li>`;
-    }
-    html += `</ul>`;
-  }
-  out.innerHTML = html;
-}
-loadTotals();
+        for (const [name, count] of Object.entries(data)) {
+            container.innerHTML += `
+                <div class="vote-result">
+                    <h2>${name}</h2>
+                    <p>${count} votes</p>
+                </div>
+            `;
+        }
+    });
 </script>
-
-</body>
-</html>
