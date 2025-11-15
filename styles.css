@@ -1,94 +1,66 @@
-/* --- GLOBAL --- */
-body {
-    margin: 0;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #2bbcff, #00a99d);
-    font-family: Trebuchet MS, sans-serif;
-    color: white;
+:root{
+  --bg:#eaf7fc;
+  --glass: rgba(255,255,255,0.55);
+  --accent1: #0ea5a4; /* emerald-ish */
+  --accent2: #60a5fa; /* sky-ish */
+  --text: #03303a;
+  --card-w: 760px;
 }
 
-/* --- GLASS BOXES --- */
-.glass-box {
-    width: 350px;
-    padding: 25px;
-    border-radius: 20px;
-    backdrop-filter: blur(12px);
-    background: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-    text-align: center;
-    transition: 0.4s ease;
+*{box-sizing:border-box;font-family:"Trebuchet MS",sans-serif}
+html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#f6fbff);}
+body{display:flex;align-items:center;justify-content:center;padding:24px;color:var(--text)}
+
+.container{
+  width:100%;
+  max-width:var(--card-w);
 }
 
-.hidden {
-    display: none !important;
+.card{
+  width:100%;
+  background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.45));
+  backdrop-filter: blur(8px) saturate(120%);
+  border-radius:18px;padding:28px;
+  box-shadow: 0 10px 30px rgba(3,48,58,0.08);
+  text-align:center;
+  margin-bottom:20px;
+  transition: all 0.4s ease;
 }
 
-.fade {
-    opacity: 0;
-    animation: fadeIn 0.8s forwards;
+h2{margin-top:6px;font-size:1.1rem;color:var(--text)}
+
+select, button{
+  width:100%;
+  padding:10px;
+  border-radius:10px;
+  margin-top:10px;
+  border:1px solid rgba(3,48,58,0.08);
 }
 
-@keyframes fadeIn {
-    from {opacity: 0; transform: translateY(10px);}
-    to {opacity: 1; transform: translateY(0);}
+button{
+  background: linear-gradient(90deg,var(--accent1),var(--accent2));
+  color:white;
+  border:none;
+  cursor:pointer;
+  font-weight:600;
+  transition:0.3s ease;
 }
 
-/* --- OPTIONS --- */
-.option {
-    display: block;
-    margin: 12px 0;
-    font-size: 18px;
+button:hover{
+  filter: brightness(1.15);
 }
 
-/* --- BUTTON --- */
-button {
-    width: 100%;
-    padding: 12px;
-    border: none;
-    background: #ffffff;
-    color: #0a3a3a;
-    font-weight: bold;
-    font-size: 17px;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: 0.3s;
+#successMessage{
+  margin-top:12px;
+  font-size:1.05rem;
+  opacity:0;
+  transition: opacity 0.5s ease;
 }
 
-button:hover {
-    background: #dff;
-    transform: scale(1.03);
+#successMessage.show{
+  opacity:1;
 }
 
-/* --- LOADING SPINNER --- */
-.spinner {
-    margin: 15px auto;
-    border: 5px solid #ffffff40;
-    border-top: 5px solid white;
-    border-radius: 50%;
-    width: 35px;
-    height: 35px;
-    animation: spin 0.6s linear infinite;
-}
-
-@keyframes spin {
-    100% { transform: rotate(360deg); }
-}
-
-/* --- SUCCESS MESSAGE --- */
-.success {
-    margin-top: 15px;
-    background: #00ffcc;
-    color: #004d4d;
-    padding: 10px;
-    border-radius: 10px;
-    font-weight: bold;
-    opacity: 1;
-    transition: opacity 1s;
-}
-
-.fade-out {
-    opacity: 0;
+.hidden{
+  display:none;
 }
