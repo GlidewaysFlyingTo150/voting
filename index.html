@@ -8,10 +8,19 @@
 </head>
 <body>
   <main class="card">
-    <h1>Glideways Annual Awards — Vote</h1>
-    <p id="status">Please sign in with Discord to vote.</p>
+   <h1>Glideways Voting</h1>
+  <button id="login">Login with Google</button>
 
-    <button id="loginBtn" class="btn">Login with Discord</button>
+  <script>
+    document.getElementById("login").addEventListener("click", () => {
+      const clientId = "YOUR_GOOGLE_CLIENT_ID";
+      const redirectUri = encodeURIComponent("https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec");
+      const scope = encodeURIComponent("openid email profile");
+      const googleUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&access_type=online&prompt=select_account`;
+
+      window.location.href = googleUrl;
+    });
+  </script>
 <div id="votingSection" hidden>
   <h2>Cast your votes (one per category)</h2>
   <form id="voteForm">
