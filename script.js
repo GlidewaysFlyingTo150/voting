@@ -1,66 +1,46 @@
-window.addEventListener('message', (ev) => {
-  console.log('Received postMessage:', ev.data);
-});
+let userEmail = null;
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwJklZ2sMbKJ6gCnmIvF7FJECSryGNX4xBHE10U42jq-pHTO9rj1GOvJG5cMf2BcP9k/exec";
 
-// --- Configuration you will update ---
-const APPS_SCRIPT_BASE = 'https://script.google.com/macros/s/AKfycbwJklZ2sMbKJ6gCnmIvF7FJECSryGNX4xBHE10U42jq-pHTO9rj1GOvJG5cMf2BcP9k/exec'; 
-// Replace YOUR_DEPLOY_ID later with your Apps Script web app URL
-// ----------------------------------------------------------------
+// Google Login callback
+function onGoogleLogin(response) {
+  const data = jwt_decode(response.credential);
+  userEmail = data.email;
 
-const loginBtn = document.getElementById('loginBtn');
-const votingSection = document.getElementById('votingSection');
-const statusEl = document.getElementById('status');
-const voteForm = document.getElementById('voteForm');
-const voteResult = document.getElementById('voteResult');
-
-let currentUser = null;
-
-// Handle login popup and postMessage from Apps Script
-loginBtn.addEventListener('click', () => {
-  const popup = window.open(`${APPS_SCRIPT_BASE}?action=login`, 'discordLogin', 'width=600,height=700');
-  // receive user from popup
-});
-
-window.addEventListener('message', (ev) => {
-  // IMPORTANT: check origin in production. Here we accept any for simplicity.
-  const data = ev.data || {};
-  if (data.source === 'glideways-discord-oauth' && data.user) {
-    currentUser = data.user;
-    onLoggedIn();
-  }
-});
-
-function onLoggedIn(){
-  statusEl.textContent = `Signed in as ${currentUser.username}#${currentUser.discriminator}`;
-  loginBtn.hidden = true;
-  votingSection.hidden = false;
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("voteBox").style.display = "block";
 }
 
-// build payload for submit
-voteForm.addEventListener('submit', (e) => {
-  e.preventDefault();
-  if (!currentUser) { alert('Please login first'); return; }
-  const fd = new FormData(voteForm);
-  const votes = {};
-  for (const [k,v] of fd.entries()) votes[k] = v;
+// Submit vote
+const submitBtn = document.getElementById("submitVote");
+submitBtn.addEventListener("click", async () => {
 
-  voteResult.textContent = 'Submitting...';
+  if(!userEmail){
+    alert("Please login first!");
+    return;
+  }
 
-  // open hidden popup to submit to Apps Script (avoids CORS)
-  const payload = encodeURIComponent(JSON.stringify(votes));
-  const url = `${APPS_SCRIPT_BASE}?action=submit&userId=${encodeURIComponent(currentUser.id)}&username=${encodeURIComponent(currentUser.username+'#'+currentUser.discriminator)}&votes=${payload}`;
-  const popup = window.open(url, 'submitVote', 'width=600,height=400');
-  // popup will postMessage back with result
-});
+  const payload = {
+    email: userEmail,
+    category: document.getElementById("category").value,
+    choice: document.getElementById("choice").value
+  };
 
-window.addEventListener('message', (ev) => {
-  const data = ev.data || {};
-  if (data.source === 'glideways-submit-result') {
-    if (data.success) {
-      voteResult.textContent = 'Thanks — your votes were recorded.';
-      voteForm.querySelectorAll('select').forEach(s => s.disabled = true);
-    } else {
-      voteResult.textContent = 'Error: ' + (data.message || 'unknown');
-    }
+  const res = await fetch(WEB_APP_URL, {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+
+  const result = await res.json();
+
+  if (result.status === "success") {
+    const msg = document.getElementById("successMessage");
+    msg.classList.add("show");
+    msg.classList.remove("hidden");
+
+    setTimeout(() => {
+      msg.classList.remove("show");
+    }, 2500);
+  } else {
+    alert("Error submitting vote: " + (result.message || "unknown error"));
   }
 });
