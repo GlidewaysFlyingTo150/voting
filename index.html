@@ -9,52 +9,89 @@
 </head>
 <body>
 
-  <div class="container">
+<div class="container">
 
-    <!-- Login Box -->
-    <div class="card glass" id="loginBox">
-      <h2>Sign in to Vote</h2>
-      <div id="g_id_onload"
-           data-client_id="232951174632-hkb769otpi9k5re4avti8mv3vamsg7hk.apps.googleusercontent.com"
-           data-callback="onGoogleLogin">
-      </div>
-
-      <div class="g_id_signin"
-           data-type="standard"
-           data-size="large"
-           data-theme="outline">
-      </div>
+  <!-- Login Box -->
+  <div class="card glass" id="loginBox">
+    <h2>Sign in to Vote</h2>
+    <div id="g_id_onload"
+         data-client_id="232951174632-hkb769otpi9k5re4avti8mv3vamsg7hk.apps.googleusercontent.com"
+         data-callback="onGoogleLogin">
     </div>
-
-    <!-- Voting Box -->
-    <div class="card glass" id="voteBox" style="display:none;">
-      <h2>Cast Your Vote</h2>
-
-      <label>Category</label>
-      <select id="category">
-        <option value="Cafes/Restaurant">Cafes / Restaurant</option>
-        <option value="Overall">Overall</option>
-        <option value="Aviation">Aviation</option>
-        <option value="Most Active">Most Active</option>
-        <option value="Most Enthusiastic">Most Enthusiastic</option>
-        <option value="Most Known">Most Known</option>
-        <option value="People's Favorite">People's Favorite</option>
-      </select>
-
-      <label>Choose a nominee</label>
-      <select id="choice">
-        <option value="Nominee 1">Nominee 1</option>
-        <option value="Nominee 2">Nominee 2</option>
-        <option value="Nominee 3">Nominee 3</option>
-      </select>
-
-      <button id="submitVote">Submit Vote</button>
-
-      <div id="successMessage" class="hidden">Vote Submitted ✔️</div>
+    <div class="g_id_signin"
+         data-type="standard"
+         data-size="large"
+         data-theme="outline">
     </div>
-
   </div>
 
-  <script src="script.js"></script>
+  <!-- Voting Box -->
+  <div class="card glass" id="voteBox" style="display:none;">
+    <h2>Cast Your Votes</h2>
+
+    <div class="category-section">
+      <h3>Cafes/Restaurant</h3>
+      <select id="category-Cafes/Restaurant">
+        <option value="Cafe A">Cafe A</option>
+        <option value="Cafe B">Cafe B</option>
+        <option value="Cafe C">Cafe C</option>
+      </select>
+    </div>
+
+    <div class="category-section">
+      <h3>Overall</h3>
+      <select id="category-Overall">
+        <option value="Nominee 1">Nominee 1</option>
+        <option value="Nominee 2">Nominee 2</option>
+      </select>
+    </div>
+
+    <div class="category-section">
+      <h3>Aviation</h3>
+      <select id="category-Aviation">
+        <option value="Nominee 1">Nominee 1</option>
+        <option value="Nominee 2">Nominee 2</option>
+      </select>
+    </div>
+
+    <div class="category-section">
+      <h3>Most Active</h3>
+      <select id="category-Most Active">
+        <option value="Nominee 1">Nominee 1</option>
+        <option value="Nominee 2">Nominee 2</option>
+      </select>
+    </div>
+
+    <div class="category-section">
+      <h3>Most Enthusiastic</h3>
+      <select id="category-Most Enthusiastic">
+        <option value="Nominee 1">Nominee 1</option>
+        <option value="Nominee 2">Nominee 2</option>
+      </select>
+    </div>
+
+    <div class="category-section">
+      <h3>Most Known</h3>
+      <select id="category-Most Known">
+        <option value="Nominee 1">Nominee 1</option>
+        <option value="Nominee 2">Nominee 2</option>
+      </select>
+    </div>
+
+    <div class="category-section">
+      <h3>People's Favorite</h3>
+      <select id="category-People's Favorite">
+        <option value="Nominee 1">Nominee 1</option>
+        <option value="Nominee 2">Nominee 2</option>
+      </select>
+    </div>
+
+    <button id="submitVote">Submit Votes</button>
+    <div id="successMessage" class="hidden">Votes Submitted ✔️</div>
+  </div>
+
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
