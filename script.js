@@ -3,7 +3,7 @@ window.addEventListener('message', (ev) => {
 });
 
 // --- Configuration you will update ---
-const APPS_SCRIPT_BASE = 'https://script.google.com/macros/s/AKfycbzlz1r5uKY9OMRoCLw1sNsGmRaUtPFiNetseujoh0qw1gPgxSCWguphaPITNxYmqmgN/exec'; 
+const APPS_SCRIPT_BASE = 'https://script.google.com/macros/s/AKfycbwJklZ2sMbKJ6gCnmIvF7FJECSryGNX4xBHE10U42jq-pHTO9rj1GOvJG5cMf2BcP9k/exec'; 
 // Replace YOUR_DEPLOY_ID later with your Apps Script web app URL
 // ----------------------------------------------------------------
 
