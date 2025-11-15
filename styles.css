@@ -1,94 +1,116 @@
-/* --- General reset --- */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Trebuchet MS', sans-serif;
+/* ---------- ROOT COLORS ---------- */
+:root {
+    --emerald: #0ac98f;
+    --skyblue: #4fc3f7;
+    --white: #ffffff;
+    --glass-bg: rgba(255, 255, 255, 0.25);
+    --glass-border: rgba(255, 255, 255, 0.45);
+    --shadow: rgba(0, 0, 0, 0.20);
+    --transition: 0.25s ease;
 }
 
+/* ---------- GLOBAL ---------- */
 body {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  background: linear-gradient(135deg, #4bd1c6, #7ed5ff); /* Glideways green/blue gradient */
-  color: #fff;
-  padding: 20px;
+    margin: 0;
+    padding: 0;
+    font-family: "Trebuchet MS", sans-serif;
+    background: linear-gradient(135deg, var(--emerald), var(--skyblue));
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: var(--white);
 }
 
-/* --- Glassy container --- */
-.container {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(12px);
-  border-radius: 20px;
-  padding: 30px 40px;
-  max-width: 500px;
-  width: 100%;
-  text-align: center;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-  margin-top: 50px;
+/* ---------- GLASS CARD ---------- */
+.glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 20px var(--shadow);
+    padding: 30px;
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+    transition: var(--transition);
+}
+.glass-card:hover {
+    scale: 1.02;
 }
 
-/* --- Headings --- */
-h1, h2 {
-  margin-bottom: 25px;
-  color: #ffffff;
-  text-shadow: 0 2px 6px rgba(0,0,0,0.35);
+/* ---------- BUTTONS ---------- */
+.button {
+    padding: 12px 24px;
+    background: var(--emerald);
+    color: white;
+    font-size: 18px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: var(--transition);
+    width: 100%;
+    margin-top: 15px;
 }
 
-/* --- Buttons --- */
-button {
-  background: linear-gradient(135deg, #00ffab, #00d4ff); /* Glow style */
-  border: none;
-  border-radius: 12px;
-  padding: 12px 25px;
-  margin: 10px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: bold;
-  transition: all 0.3s ease;
-  color: #fff;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+.button:hover {
+    background: var(--skyblue);
+    transform: translateY(-3px);
 }
 
-button:hover {
-  filter: brightness(1.15);
-  transform: translateY(-2px);
+/* ---------- INPUT FIELDS ---------- */
+input, select {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+    outline: none;
+    margin-top: 10px;
+    background: rgba(255,255,255,0.2);
+    color: var(--white);
+    font-size: 16px;
+    backdrop-filter: blur(10px);
+}
+input::placeholder {
+    color: rgba(255,255,255,0.8);
 }
 
-/* --- User info --- */
-#user-info {
-  margin-bottom: 20px;
-  font-weight: bold;
-  color: #ffffff;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+/* ---------- LOADING SPINNER ---------- */
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 5px solid rgba(255,255,255,0.3);
+    border-top-color: var(--emerald);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+    margin: 15px auto;
+    display: none; /* show with JS */
 }
 
-/* --- Voting buttons container --- */
-#voting-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
-/* --- Vote results list --- */
-#vote-list {
-  list-style: none;
-  margin-top: 20px;
-  padding: 0;
+/* ---------- SUCCESS MESSAGE ---------- */
+.success-message {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: var(--transition);
+    color: #e8ffe8;
+    font-size: 18px;
+    margin-top: 20px;
+}
+.success-message.show {
+    opacity: 1;
+    transform: translateY(0);
 }
 
-#vote-list li {
-  background: rgba(255, 255, 255, 0.15);
-  padding: 12px 20px;
-  margin: 6px 0;
-  border-radius: 12px;
-  text-align: center;
-  transition: background 0.3s ease;
-  font-weight: bold;
-}
-
-#vote-list li:hover {
-  background: rgba(255, 255, 255, 0.3);
+/* ---------- RESULTS PAGE ---------- */
+.vote-result {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border-radius: 15px;
+    padding: 15px;
+    margin: 10px 0;
+    border: 1px solid var(--glass-border);
 }
