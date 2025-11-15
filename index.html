@@ -1,100 +1,78 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Glideways Annual Awards</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8">
+  <title>Glideways Voting</title>
 </head>
 <body>
-  <main class="card">
-   <h1>Glideways Voting</h1>
-  <button id="login">Login with Google</button>
+  <h1>Glideways Voting</h1>
+
+  <!-- Login -->
+  <div id="login-section">
+    <button id="login">Login with Google</button>
+  </div>
+
+  <!-- User info -->
+  <div id="user-info" style="margin-top: 10px;"></div>
+
+  <!-- Voting -->
+  <div id="voting-section" style="margin-top: 20px; display: none;">
+    <h2>Vote for Your Favorite Option</h2>
+    <button class="vote" data-option="Option1">Option 1</button>
+    <button class="vote" data-option="Option2">Option 2</button>
+    <button class="vote" data-option="Option3">Option 3</button>
+  </div>
 
   <script>
-    document.getElementById("login").addEventListener("click", () => {
+    const SCRIPT_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
+    const loginButton = document.getElementById("login");
+    const userInfoDiv = document.getElementById("user-info");
+    const votingSection = document.getElementById("voting-section");
+
+    // Check login
+    const token = localStorage.getItem("google_token");
+    const name = localStorage.getItem("google_name");
+    const email = localStorage.getItem("google_email");
+
+    function showUser(name) {
+      userInfoDiv.textContent = `Logged in as ${name}`;
+      loginButton.style.display = "none";
+      votingSection.style.display = "block";
+    }
+
+    if (token && name) showUser(name);
+
+    // Login button
+    loginButton.addEventListener("click", () => {
       const clientId = "YOUR_GOOGLE_CLIENT_ID";
-      const redirectUri = encodeURIComponent("https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec");
+      const redirectUri = encodeURIComponent(SCRIPT_URL);
       const scope = encodeURIComponent("openid email profile");
       const googleUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&access_type=online&prompt=select_account`;
-
       window.location.href = googleUrl;
     });
+
+    // Voting buttons
+    document.querySelectorAll(".vote").forEach(button => {
+      button.addEventListener("click", async () => {
+        if (!localStorage.getItem("google_token")) return alert("You must log in first!");
+
+        const vote = button.dataset.option;
+        const payload = {
+          name: localStorage.getItem("google_name"),
+          email: localStorage.getItem("google_email"),
+          vote: vote
+        };
+
+        const res = await fetch(SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify(payload),
+          headers: { "Content-Type": "application/json" }
+        });
+        const data = await res.json();
+        if (data.success) alert(`Vote recorded for ${vote}`);
+        else alert("Error recording vote: " + (data.message || data.error));
+      });
+    });
   </script>
-<div id="votingSection" hidden>
-  <h2>Cast your votes (one per category)</h2>
-  <form id="voteForm">
-
-    <div class="category">
-      <label> Cafes/Restaurants 
-        <select name="Cafes/Restaurants" required>
-          <option value="">— choose —</option>
-          <option>A</option><option>B</option><option>C</option>
-        </select>
-      </label>
-    </div>
-
-    <div class="category">
-      <label> Aviation
-        <select name="Aviation" required>
-          <option value="">— choose —</option>
-          <option>A</option><option>B</option><option>C</option>
-        </select>
-      </label>
-    </div>
-
-    <div class="category">
-      <label> Most Active
-        <select name="Most Active" required>
-          <option value="">— choose —</option>
-          <option>A</option><option>B</option><option>C</option>
-        </select>
-      </label>
-    </div>
-
-    <div class="category">
-      <label> Most Enthusiastic
-        <select name="Most Enthusiastic" required>
-          <option value="">— choose —</option>
-          <option>A</option><option>B</option><option>C</option>
-        </select>
-      </label>
-    </div>
-
-    <div class="category">
-      <label> Most Known
-        <select name="Most Known" required>
-          <option value="">— choose —</option>
-          <option>A</option><option>B</option><option>C</option>
-        </select>
-      </label>
-    </div>
-
-    <div class="category">
-      <label> People's Favorites
-        <select name="People's Favorites" required>
-          <option value="">— choose —</option>
-          <option>A</option><option>B</option><option>C</option>
-        </select>
-      </label>
-    </div>
-    
-    <div class="category">
-      <label> Overall
-        <select name="Overall" required>
-          <option value="">— choose —</option>
-          <option>A</option><option>B</option><option>C</option>
-        </select>
-      </label>
-    </div>
-
-    <div class="actions">
-      <button id="submitVote" class="btn primary">Submit Votes</button>
-    </div>
-  </form>
-  <p id="voteResult" class="muted"></p>
-</div>
-  </main>
 </body>
-<script src="script.js"></script>
 </html>
