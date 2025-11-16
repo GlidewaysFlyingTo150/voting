@@ -1,70 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Glideways Awards Voting</title>
+  <meta charset="utf-8" />
+  <title>Glideways Annual Awards — Vote</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
 
+  <!-- styles -->
   <link rel="stylesheet" href="styles.css">
 
-  <!-- Google Sign-In -->
+  <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-
 </head>
 <body>
+  <div class="page-wrap">
+    <main class="card" id="mainCard">
 
-<div class="container">
+      <!-- Header -->
+      <header>
+        <h1>Glideways Annual Awards</h1>
+        <p class="muted small">Sign in with Google to cast your votes. Submissions are anonymous to the public — we only store email for verification.</p>
+      </header>
 
-  <!-- LOGIN BOX -->
-  <div class="card glass" id="loginBox">
-    <h1>Glideways Annual Awards</h1>
-    <h2>Please Sign In to Vote</h2>
+      <!-- Login box (white style) -->
+      <section class="box" id="loginBox">
+        <h2 class="small muted">Sign in to vote</h2>
 
-    <div id="g_id_onload"
-         data-client_id="232951174632-hkb769otpi9k5re4avti8mv3vamsg7hk.apps.googleusercontent.com"
-         data-callback="onGoogleLogin">
-    </div>
+        <!-- GSI button container (outline/white) -->
+        <div id="googleButtonWrapper" class="g-wrapper">
+          <div id="googleButton"></div>
+        </div>
 
-    <div id="googleButton"></div>
+        <div id="loginHint" class="small muted">Use your Glideways account (Google) to sign in.</div>
+      </section>
+
+      <!-- Voting box -->
+      <section class="box" id="voteBox" style="display:none;">
+        <h2>Cast your votes</h2>
+
+        <!-- Welcome + email (hidden if you prefer) -->
+        <div id="welcomeText" class="small muted"></div>
+
+        <!-- Categories -->
+        <form id="voteForm" class="vote-form">
+
+          <!-- Example: I added a comprehensive set — edit values/labels as you like -->
+          <div class="category">
+            <label for="cafe">Cafe / Restaurant</label>
+            <select id="cafe" name="Cafe/Restaurant">
+              <option>Cafe A</option>
+              <option>Cafe B</option>
+              <option>Cafe C</option>
+            </select>
+          </div>
+
+          <div class="category">
+            <label for="aviation">Aviation</label>
+            <select id="aviation" name="Aviation">
+              <option>Nominee 1</option>
+              <option>Nominee 2</option>
+            </select>
+          </div>
+
+          <div class="category">
+            <label for="mostActive">Most Active</label>
+            <select id="mostActive" name="Most Active">
+              <option>Nominee 1</option>
+              <option>Nominee 2</option>
+            </select>
+          </div>
+
+          <div class="category">
+            <label for="mostEnthusiastic">Most Enthusiastic</label>
+            <select id="mostEnthusiastic" name="Most Enthusiastic">
+              <option>Nominee 1</option>
+              <option>Nominee 2</option>
+            </select>
+          </div>
+
+          <div class="category">
+            <label for="mostKnown">Most Known</label>
+            <select id="mostKnown" name="Most Known">
+              <option>Nominee 1</option>
+              <option>Nominee 2</option>
+            </select>
+          </div>
+
+          <div class="category">
+            <label for="peoplesFav">People's Favorite</label>
+            <select id="peoplesFav" name="People's Favorite">
+              <option>Nominee 1</option>
+              <option>Nominee 2</option>
+            </select>
+          </div>
+        
+          <div class="category">
+            <label for="overall">Overall</label>
+            <select id="overall" name="Overall">
+              <option>Nominee 1</option>
+              <option>Nominee 2</option>
+              <option>Nominee 3</option>
+            </select>
+          </div>
+          
+          <div class="actions">
+            <button type="submit" id="submitVote" class="btn primary">Submit Votes</button>
+          </div>
+
+          <!-- spinner + success -->
+          <div class="status-row">
+            <div id="loadingSpinner" class="spinner" aria-hidden="true"></div>
+            <div id="successMessage" class="success">Votes submitted ✨</div>
+          </div>
+
+        </form>
+      </section>
+
+    </main>
   </div>
 
-
-  <!-- VOTING BOX -->
-  <div class="card glass" id="voteBox" style="display:none;">
-    <h1>Cast Your Votes</h1>
-    <p id="welcomeText"></p>
-
-    <div class="category-section">
-      <h3>Cafe/Restaurant</h3>
-      <select id="cat1">
-        <option value="Cafe A">Cafe A</option>
-        <option value="Cafe B">Cafe B</option>
-      </select>
-    </div>
-
-    <div class="category-section">
-      <h3>Overall</h3>
-      <select id="cat2">
-        <option value="Nominee 1">Nominee 1</option>
-        <option value="Nominee 2">Nominee 2</option>
-      </select>
-    </div>
-
-    <div class="category-section">
-      <h3>Aviation</h3>
-      <select id="cat3">
-        <option value="Nominee 1">Nominee 1</option>
-        <option value="Nominee 2">Nominee 2</option>
-      </select>
-    </div>
-
-    <button id="submitVote">Submit Votes</button>
-
-    <div id="loadingSpinner" class="hidden">Submitting...</div>
-    <div id="successMessage" class="hidden">Votes Submitted ✔</div>
-  </div>
-
-</div>
-
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
