@@ -1,42 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Glideways Voting Results</title>
-<link rel="stylesheet" href="styles.css">
-
-<script>
-async function loadResults() {
-    document.getElementById("loading").style.display = "flex";
-
-    const res = await fetch("YOUR_GOOGLE_SCRIPT_URL_HERE");
-    const data = await res.json();
-
-    document.getElementById("loading").style.display = "none";
-
-    document.getElementById("a-count").innerText = data.A;
-    document.getElementById("b-count").innerText = data.B;
-    document.getElementById("c-count").innerText = data.C;
-}
-</script>
-
+  <meta charset="UTF-8">
+  <title>Glideways Award Results</title>
+  <link rel="stylesheet" href="totals.css">
+  <link rel="icon" type="image/png" href="logo.png">
 </head>
 
-<body onload="loadResults()">
-
+<body>
 <div class="container">
-    <h1 class="title">Voting Results</h1>
+  <div class="card glass">
+    <h1>Glideways Annual Awards</h1>
+    <h2>Live Results</h2>
+    <p class="muted small">Results update automatically</p>
 
-    <div class="result-box">
-        <p><strong>Option A:</strong> <span id="a-count">0</span></p>
-        <p><strong>Option B:</strong> <span id="b-count">0</span></p>
-        <p><strong>Option C:</strong> <span id="c-count">0</span></p>
-    </div>
-
-    <a href="index.html" class="results-link">← Back</a>
+    <div id="resultsContainer"></div>
+  </div>
 </div>
 
-<div id="loading"><div class="spinner"></div></div>
-
+<script src="totals.js"></script>
 </body>
 </html>
