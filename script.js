@@ -1,23 +1,26 @@
-
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwJklZ2sMbKJ6gCnmIvF7FJECSryGNX4xBHE10U42jq-pHTO9rj1GOvJG5cMf2BcP9k/exec";
 
-// --- Minimal JWT decode for Google credential (no external lib) ---
+/* ---------------- JWT DECODE (no external libs) ---------------- */
 function decodeJwtPayload(token) {
   try {
     const parts = token.split(".");
     if (parts.length < 2) return null;
+
     const payload = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const json = decodeURIComponent(atob(payload).split("").map(function(c) {
-      return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(""));
-    return JSON.parse(json);
+    const decoded = decodeURIComponent(
+      atob(payload)
+        .split("")
+        .map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+    return JSON.parse(decoded);
   } catch (e) {
     console.error("JWT decode failed", e);
     return null;
   }
 }
 
-// --- Helper: animate from 0 to target number in element ---
+/* ---------------- Count Animation ---------------- */
 function animateCount(el, target, duration = 1000) {
   const start = 0;
   const startTime = performance.now();
@@ -30,7 +33,7 @@ function animateCount(el, target, duration = 1000) {
   requestAnimationFrame(step);
 }
 
-// --- Helper: create a trend row DOM node ---
+/* ---------------- Trend Row Builder ---------------- */
 function createTrendRow(choice, count, maxCount) {
   const row = document.createElement("div");
   row.className = "trend-row";
@@ -51,7 +54,7 @@ function createTrendRow(choice, count, maxCount) {
 
   const bar = document.createElement("div");
   bar.className = "trend-bar";
-  // width will be animated based on proportion
+
   const widthPct = maxCount > 0 ? Math.round((count / maxCount) * 100) : 0;
   bar.style.width = `${widthPct}%`;
 
@@ -62,216 +65,175 @@ function createTrendRow(choice, count, maxCount) {
   row.appendChild(left);
   row.appendChild(right);
 
-  // animate the number
-  setTimeout(() => animateCount(countEl, count, 900), 100);
+  setTimeout(() => animateCount(countEl, count), 150);
 
   return row;
 }
 
-// --- Google callback (called by Google's library) ---
+/* ---------------- GOOGLE LOGIN ---------------- */
 let currentUserEmail = null;
+
 function onGoogleLogin(response) {
   const payload = decodeJwtPayload(response.credential);
   if (!payload) {
-    alert("Login failed (couldn't decode token).");
+    alert("Google login failed.");
     return;
   }
-  currentUserEmail = payload.email || payload["email"];
-  // show vote UI if present
-  const loginBox = document.getElementById("loginBox");
-  const voteBox = document.getElementById("voteBox");
-  if (loginBox) loginBox.style.display = "none";
-  if (voteBox) voteBox.style.display = "block";
+
+  currentUserEmail = payload.email;
+
+  // Swap boxes
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("voteBox").style.display = "block";
 }
 
-// --- INDEX PAGE: collect all category sections -> votes, POST to Apps Script ---
-async function handleIndexPage() {
+/* ---------------- VOTE SUBMISSION (index.html) ---------------- */
+function handleIndexPage() {
   const voteBox = document.getElementById("voteBox");
-  if (!voteBox) return; // not index page
+  if (!voteBox) return;
 
-  // Submit button
   const submitBtn = document.getElementById("submitVote");
   const successMessage = document.getElementById("successMessage");
 
   submitBtn.addEventListener("click", async () => {
     if (!currentUserEmail) {
-      alert("Please sign in to vote first.");
+      alert("Please sign in first.");
       return;
     }
 
-    // Gather votes: find all .category-section inside voteBox
     const sections = voteBox.querySelectorAll(".category-section");
     const votes = [];
+
     sections.forEach(sec => {
-      const h3 = sec.querySelector("h3");
-      const select = sec.querySelector("select");
-      if (!h3 || !select) return;
-      const category = h3.textContent.trim();
-      const choice = select.value;
-      votes.push({ category, choice });
+      const cat = sec.querySelector("h3").textContent.trim();
+      const choice = sec.querySelector("select").value;
+      votes.push({ category: cat, choice });
     });
 
-    if (votes.length === 0) {
-      alert("No votes found (no dropdowns).");
-      return;
-    }
+    try {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting...";
 
-    // POST to Apps Script
-    t// POST to Apps Script
-try {
-  submitBtn.disabled = true;
-  submitBtn.textContent = "Submitting...";
+      const res = await fetch(WEB_APP_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: currentUserEmail, votes })
+      });
 
-  const res = await fetch(WEB_APP_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: currentUserEmail, votes })
-  });
+      const json = await res.json();
 
-  const json = await res.json();
+      if (json.status === "success") {
+        successMessage.classList.remove("hidden");
+        successMessage.classList.add("show");
+        submitBtn.textContent = "Submitted ✓";
 
-  if (json && json.status === "success") {
-    successMessage.classList.add("show");
-    successMessage.classList.remove("hidden");
-
-    submitBtn.textContent = "Submitted ✓";
-
-    setTimeout(() => {
-      successMessage.classList.remove("show");
-      submitBtn.disabled = false;
-      submitBtn.textContent = "Submit Votes";
-    }, 2200);
-  } else {
-    throw new Error(json?.message || "Unknown error");
-  }
-
-} catch (err) {
-  console.error("Submit error:", err);
-  alert("Failed to submit votes: " + err);
-  submitBtn.disabled = false;
-  submitBtn.textContent = "Submit Votes";
-}
+        setTimeout(() => {
+          successMessage.classList.remove("show");
+          successMessage.classList.add("hidden");
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Submit Votes";
+        }, 2200);
       } else {
-        throw new Error(json && json.message ? json.message : "Unknown error");
+        throw new Error(json.message || "Unknown error");
       }
     } catch (err) {
       console.error("Submit error:", err);
-      alert("Failed to submit votes: " + err);
+      alert("Failed to submit votes: " + err.message);
       submitBtn.disabled = false;
       submitBtn.textContent = "Submit Votes";
     }
   });
 }
 
-// --- TOTALS PAGE:  totals, render trend rows, animated counters, category filter ---
-async function handleTotalsPage() {
-  // presence of #resultsContainer determines totals page
+/* ---------------- TOTALS PAGE (totals.html) ---------------- */
+function handleTotalsPage() {
   const resultsContainer = document.getElementById("resultsContainer");
   if (!resultsContainer) return;
 
-  // Build UI: top filter select + totals list
-  const headerRow = document.createElement("div");
-  headerRow.className = "results-header";
-  const filterLabel = document.createElement("label");
-  filterLabel.textContent = "Filter by category:";
-  filterLabel.htmlFor = "categoryFilter";
+  const header = document.createElement("div");
+  header.className = "results-header";
+  header.innerHTML = `
+      <label for="categoryFilter">Filter:</label>
+      <select id="categoryFilter">
+          <option value="__ALL__">All</option>
+      </select>
+  `;
 
-  const filterSelect = document.createElement("select");
-  filterSelect.id = "categoryFilter";
-  filterSelect.innerHTML = `<option value="__ALL__">All categories</option>`;
+  const list = document.createElement("div");
+  list.id = "resultsList";
 
-  headerRow.appendChild(filterLabel);
-  headerRow.appendChild(filterSelect);
-  resultsContainer.appendChild(headerRow);
+  resultsContainer.appendChild(header);
+  resultsContainer.appendChild(list);
 
-  const listWrap = document.createElement("div");
-  listWrap.id = "resultsList";
-  resultsContainer.appendChild(listWrap);
+  const filter = header.querySelector("#categoryFilter");
 
   async function fetchTotals() {
     try {
       const res = await fetch(WEB_APP_URL);
-      const totals = await res.json(); // { category: { choice: count } }
+      const totals = await res.json();
+
       renderTotals(totals);
-      populateFilter(Object.keys(totals));
-    } catch (err) {
-      console.error("Failed to fetch totals:", err);
-      listWrap.innerHTML = `<p class="muted">Failed to load results.</p>`;
+      updateFilter(Object.keys(totals));
+    } catch (e) {
+      console.error(e);
+      list.innerHTML = `<p>Failed to load results.</p>`;
     }
   }
 
-  function populateFilter(categories) {
-    // add categories if not present
-    categories.forEach(cat => {
-      if (!Array.from(filterSelect.options).some(o => o.value === cat)) {
+  function updateFilter(cats) {
+    cats.forEach(c => {
+      if (![...filter.options].some(o => o.value === c)) {
         const opt = document.createElement("option");
-        opt.value = cat;
-        opt.textContent = cat;
-        filterSelect.appendChild(opt);
+        opt.value = c;
+        opt.textContent = c;
+        filter.appendChild(opt);
       }
     });
   }
 
   function renderTotals(totals) {
-    listWrap.innerHTML = "";
-    // compute global max for bars
-    let globalMax = 0;
-    for (const cat of Object.keys(totals)) {
-      const choices = totals[cat];
-      for (const count of Object.values(choices)) {
-        if (count > globalMax) globalMax = count;
-      }
-    }
+    list.innerHTML = "";
 
-    const selected = filterSelect.value || "__ALL__";
+    const selected = filter.value;
     const catsToShow = selected === "__ALL__" ? Object.keys(totals) : [selected];
 
+    let globalMax = 1;
+    Object.values(totals).forEach(cat => {
+      Object.values(cat).forEach(count => {
+        if (count > globalMax) globalMax = count;
+      });
+    });
+
     catsToShow.forEach(cat => {
-      const catBlock = document.createElement("div");
-      catBlock.className = "results-category";
+      const block = document.createElement("div");
+      block.className = "results-category";
 
-      const title = document.createElement("h3");
-      title.textContent = cat;
-      catBlock.appendChild(title);
+      block.innerHTML = `<h3>${cat}</h3>`;
 
-      const choices = totals[cat] || {};
-      // create an array sorted by count desc
-      const entries = Object.entries(choices).sort((a,b)=> b[1]-a[1]);
+      const entries = Object.entries(totals[cat] || {}).sort((a, b) => b[1] - a[1]);
 
-      // if no choices, show empty
       if (entries.length === 0) {
-        const p = document.createElement("p");
-        p.className = "muted";
-        p.textContent = "No votes yet.";
-        catBlock.appendChild(p);
+        block.innerHTML += `<p>No votes yet.</p>`;
       } else {
-        // trend rows
-        const maxCount = entries[0][1] || globalMax || 1;
         entries.forEach(([choice, count]) => {
-          const row = createTrendRow(choice, count, Math.max(maxCount, globalMax));
-          catBlock.appendChild(row);
+          block.appendChild(createTrendRow(choice, count, globalMax));
         });
       }
 
-      listWrap.appendChild(catBlock);
+      list.appendChild(block);
     });
   }
 
-  // filter change
-  filterSelect.addEventListener("change", () => {
-    fetchTotals();
-  });
+  filter.addEventListener("change", fetchTotals);
 
-  // initial fetch and periodic refresh
-  await fetchTotals();
-  setInterval(Totals, 7000);
+  fetchTotals();
+  setInterval(fetchTotals, 7000); // FIXED
 }
 
-// --- Initialization: decide which page we are on ---
+/* ---------------- INIT ---------------- */
 document.addEventListener("DOMContentLoaded", () => {
   handleIndexPage();
   handleTotalsPage();
 });
 
-// Expose onGoogleLogin globally for Google's callback
 window.onGoogleLogin = onGoogleLogin;
