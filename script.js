@@ -10,37 +10,56 @@ function onGoogleLogin(response) {
   document.getElementById("voteBox").style.display = "block";
 }
 
-// Submit vote
+// Submit votes
 const submitBtn = document.getElementById("submitVote");
 submitBtn.addEventListener("click", async () => {
 
-  if(!userEmail){
+  if (!userEmail) {
     alert("Please login first!");
     return;
   }
 
-  const payload = {
-    email: userEmail,
-    category: document.getElementById("category").value,
-    choice: document.getElementById("choice").value
-  };
+  // List of categories matching safe HTML IDs (no spaces/apostrophes)
+  const categories = [
+    "Cafe/Restaurant",
+    "Overall",
+    "Aviation",
+    "MostActive",
+    "MostEnthusiastic",
+    "MostKnown",
+    "PeoplesFavorite"
+  ];
 
-  const res = await fetch(WEB_APP_URL, {
-    method: "POST",
-    body: JSON.stringify(payload)
-  });
+  // Build votes array
+  const votes = categories.map(cat => {
+    const select = document.getElementById(`category-${cat}`);
+    if (!select) {
+      console.error(`Dropdown for category "${cat}" not found`);
+      return null;
+    }
+    return { category: cat, choice: select.value };
+  }).filter(v => v !== null);
 
-  const result = await res.json();
+  try {
+    const res = await fetch(WEB_APP_URL, {
+      method: "POST",
+      body: JSON.stringify({ email: userEmail, votes })
+    });
 
-  if (result.status === "success") {
-    const msg = document.getElementById("successMessage");
-    msg.classList.add("show");
-    msg.classList.remove("hidden");
+    const result = await res.json();
 
-    setTimeout(() => {
-      msg.classList.remove("show");
-    }, 2500);
-  } else {
-    alert("Error submitting vote: " + (result.message || "unknown error"));
+    if (result.status === "success") {
+      const msg = document.getElementById("successMessage");
+      msg.classList.add("show");
+      msg.classList.remove("hidden");
+
+      setTimeout(() => msg.classList.remove("show"), 2500);
+    } else {
+      alert("Error submitting votes: " + (result.message || "unknown error"));
+    }
+
+  } catch(err) {
+    alert("Error sending votes: " + err);
   }
+
 });
