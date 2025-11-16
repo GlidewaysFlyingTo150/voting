@@ -1,8 +1,8 @@
-const WEB_APP_URL =
-  "https://script.google.com/macros/s/AKfycbwJklZ2sMbKJ6gCnmIvF7FJECSryGNX4xBHE10U42jq-pHTO9rj1GOvJG5cMf2BcP9k/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwJklZ2sMbKJ6gCnmIvF7FJECSryGNX4xBHE10U42jq-pHTO9rj1GOvJG5cMf2BcP9k/exec";
 
-
-// ---------------- JWT DECODE ----------------
+/* -------------------------------
+   Minimal JWT decode (no library)
+-------------------------------- */
 function decodeJwtPayload(token) {
   try {
     const parts = token.split(".");
@@ -16,66 +16,50 @@ function decodeJwtPayload(token) {
     );
     return JSON.parse(json);
   } catch (e) {
-    console.error("JWT decode failed", e);
+    console.error("JWT decode failed:", e);
     return null;
   }
 }
 
-
-// ---------------- ANIMATED COUNTER ----------------
+/* -------------------------------
+   Animated Count
+-------------------------------- */
 function animateCount(el, target, duration = 1000) {
-  const start = 0;
   const startTime = performance.now();
   function step(now) {
     const progress = Math.min((now - startTime) / duration, 1);
-    const value = Math.floor(start + (target - start) * progress);
-    el.textContent = value.toLocaleString();
+    el.textContent = Math.floor(target * progress);
     if (progress < 1) requestAnimationFrame(step);
   }
   requestAnimationFrame(step);
 }
 
-
-// ---------------- TREND ROW ----------------
+/* -------------------------------
+   Trend Row Builder
+-------------------------------- */
 function createTrendRow(choice, count, maxCount) {
   const row = document.createElement("div");
   row.className = "trend-row";
 
-  const left = document.createElement("div");
-  left.className = "trend-left";
-  left.textContent = choice;
+  row.innerHTML = `
+    <div class="trend-left">${choice}</div>
+    <div class="trend-right">
+      <div class="trend-count">0</div>
+      <div class="trend-bar-wrap">
+        <div class="trend-bar" style="width:${(count / maxCount) * 100}%"></div>
+      </div>
+    </div>
+  `;
 
-  const right = document.createElement("div");
-  right.className = "trend-right";
-
-  const countEl = document.createElement("div");
-  countEl.className = "trend-count";
-  countEl.textContent = "0";
-
-  const barWrap = document.createElement("div");
-  barWrap.className = "trend-bar-wrap";
-
-  const bar = document.createElement("div");
-  bar.className = "trend-bar";
-
-  const widthPct = maxCount > 0 ? Math.round((count / maxCount) * 100) : 0;
-  bar.style.width = `${widthPct}%`;
-
-  barWrap.appendChild(bar);
-  right.appendChild(countEl);
-  right.appendChild(barWrap);
-
-  row.appendChild(left);
-  row.appendChild(right);
-
-  // animate count
-  setTimeout(() => animateCount(countEl, count, 900), 100);
+  const countEl = row.querySelector(".trend-count");
+  setTimeout(() => animateCount(countEl, count), 150);
 
   return row;
 }
 
-
-// ---------------- LOGIN ----------------
+/* -------------------------------
+   Google Login Callback
+-------------------------------- */
 let currentUserEmail = null;
 
 function onGoogleLogin(response) {
@@ -91,8 +75,9 @@ function onGoogleLogin(response) {
   document.getElementById("voteBox").style.display = "block";
 }
 
-
-// ---------------- INDEX PAGE ----------------
+/* -------------------------------
+   INDEX PAGE – Submit Votes
+-------------------------------- */
 function handleIndexPage() {
   const voteBox = document.getElementById("voteBox");
   if (!voteBox) return;
@@ -110,15 +95,10 @@ function handleIndexPage() {
     const votes = [];
 
     sections.forEach(sec => {
-      const category = sec.querySelector("h3")?.textContent.trim();
-      const choice = sec.querySelector("select")?.value;
-      if (category && choice) votes.push({ category, choice });
+      const category = sec.querySelector("h3").textContent.trim();
+      const choice = sec.querySelector("select").value;
+      votes.push({ category, choice });
     });
-
-    if (votes.length === 0) {
-      alert("No votes selected.");
-      return;
-    }
 
     try {
       submitBtn.disabled = true;
@@ -127,23 +107,28 @@ function handleIndexPage() {
       const res = await fetch(WEB_APP_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: currentUserEmail, votes })
+        body: JSON.stringify({
+          email: currentUserEmail,
+          votes
+        })
       });
 
       const json = await res.json();
 
       if (json.status === "success") {
-        successMessage.classList.add("show");
         successMessage.classList.remove("hidden");
+        successMessage.classList.add("show");
+
         submitBtn.textContent = "Submitted ✓";
 
         setTimeout(() => {
           successMessage.classList.remove("show");
+          successMessage.classList.add("hidden");
           submitBtn.disabled = false;
           submitBtn.textContent = "Submit Votes";
-        }, 2000);
+        }, 2200);
       } else {
-        throw new Error(json.message);
+        throw new Error(json.message || "Unknown error");
       }
     } catch (err) {
       console.error("Submit error:", err);
@@ -154,42 +139,77 @@ function handleIndexPage() {
   });
 }
 
-
-// ---------------- TOTALS PAGE ----------------
+/* -------------------------------
+   TOTALS PAGE (totals.html)
+-------------------------------- */
 function handleTotalsPage() {
-  const resultsContainer = document.getElementById("resultsContainer");
-  if (!resultsContainer) return;
-
-  const headerRow = document.createElement("div");
-  headerRow.className = "results-header";
-
-  const filterLabel = document.createElement("label");
-  filterLabel.textContent = "Filter by category:";
+  const container = document.getElementById("resultsContainer");
+  if (!container) return;
 
   const filterSelect = document.createElement("select");
   filterSelect.id = "categoryFilter";
   filterSelect.innerHTML = `<option value="__ALL__">All Categories</option>`;
 
-  headerRow.appendChild(filterLabel);
-  headerRow.appendChild(filterSelect);
-  resultsContainer.appendChild(headerRow);
-
   const listWrap = document.createElement("div");
   listWrap.id = "resultsList";
-  resultsContainer.appendChild(listWrap);
 
-  async function fetchTotals() {
+  container.appendChild(filterSelect);
+  container.appendChild(listWrap);
+
+  async function loadTotals() {
     try {
       const res = await fetch(WEB_APP_URL);
       const totals = await res.json();
+
       renderTotals(totals);
-      updateFilter(Object.keys(totals));
+
+      // populate filter
+      filterSelect.innerHTML = `<option value="__ALL__">All Categories</option>`;
+      Object.keys(totals).forEach(cat => {
+        filterSelect.innerHTML += `<option value="${cat}">${cat}</option>`;
+      });
     } catch (err) {
-      listWrap.innerHTML = `<p class="muted">Failed to load results.</p>`;
+      console.error("Totals fetch error:", err);
+      listWrap.innerHTML = `<p>Failed to load results.</p>`;
     }
   }
 
-  function updateFilter(cats) {
+  function renderTotals(totals) {
+    listWrap.innerHTML = "";
+
+    const selected = filterSelect.value;
+    const cats = selected === "__ALL__" ? Object.keys(totals) : [selected];
+
     cats.forEach(cat => {
-      if (!Array.from(filterSelect.options).some(o => o.value === cat)) {
-        const opt = document.createElement("option");
+      const block = document.createElement("div");
+      block.className = "results-category";
+
+      const title = document.createElement("h3");
+      title.textContent = cat;
+      block.appendChild(title);
+
+      const entries = Object.entries(totals[cat] || {}).sort((a, b) => b[1] - a[1]);
+      const max = entries.length ? entries[0][1] : 1;
+
+      entries.forEach(([choice, count]) => {
+        block.appendChild(createTrendRow(choice, count, max));
+      });
+
+      listWrap.appendChild(block);
+    });
+  }
+
+  filterSelect.addEventListener("change", loadTotals);
+  loadTotals();
+  setInterval(loadTotals, 7000);
+}
+
+/* -------------------------------
+   Init
+-------------------------------- */
+document.addEventListener("DOMContentLoaded", () => {
+  handleIndexPage();
+  handleTotalsPage();
+});
+
+window.onGoogleLogin = onGoogleLogin;
