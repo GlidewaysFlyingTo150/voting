@@ -4,28 +4,19 @@
   <meta charset="utf-8" />
   <title>Glideways Annual Awards — Vote</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-
-  <!-- styles -->
+  <link rel="icon" type="image/png" href="logo.png">
   <link rel="stylesheet" href="styles.css">
-
-  <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
   <div class="page-wrap">
     <main class="card" id="mainCard">
-
-      <!-- Header -->
       <header>
         <h1>Glideways Annual Awards</h1>
         <p class="muted small">Submissions are anonymous to the public — we only store email for verification.</p>
       </header>
-
-      <!-- Login box (white style) -->
       <section class="box" id="loginBox">
         <h2 class="small muted">Please sign in with Google to vote</h2>
-
-        <!-- GSI button container (outline/white) -->
         <div id="googleButtonWrapper" class="g-wrapper">
           <div id="googleButton"></div>
         </div>
@@ -34,14 +25,12 @@
       <!-- Voting box -->
       <section class="box" id="voteBox" style="display:none;">
         <h2>Cast your votes</h2>
-
-        <!-- Welcome + email (hidden if you prefer) -->
+        
         <div id="welcomeText" class="small muted"></div>
 
         <!-- Categories -->
         <form id="voteForm" class="vote-form">
 
-          <!-- Example: I added a comprehensive set — edit values/labels as you like -->
           <div class="category">
             <label for="cafe">Cafe / Restaurant</label>
             <select id="cafe" name="Cafe/Restaurant">
