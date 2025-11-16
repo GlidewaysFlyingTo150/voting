@@ -1,26 +1,28 @@
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwJklZ2sMbKJ6gCnmIvF7FJECSryGNX4xBHE10U42jq-pHTO9rj1GOvJG5cMf2BcP9k/exec";
+const WEB_APP_URL =
+  "https://script.google.com/macros/s/AKfycbwJklZ2sMbKJ6gCnmIvF7FJECSryGNX4xBHE10U42jq-pHTO9rj1GOvJG5cMf2BcP9k/exec";
 
-/* ---------------- JWT DECODE (no external libs) ---------------- */
+
+// ---------------- JWT DECODE ----------------
 function decodeJwtPayload(token) {
   try {
     const parts = token.split(".");
     if (parts.length < 2) return null;
-
     const payload = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const decoded = decodeURIComponent(
+    const json = decodeURIComponent(
       atob(payload)
         .split("")
         .map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
         .join("")
     );
-    return JSON.parse(decoded);
+    return JSON.parse(json);
   } catch (e) {
     console.error("JWT decode failed", e);
     return null;
   }
 }
 
-/* ---------------- Count Animation ---------------- */
+
+// ---------------- ANIMATED COUNTER ----------------
 function animateCount(el, target, duration = 1000) {
   const start = 0;
   const startTime = performance.now();
@@ -33,7 +35,8 @@ function animateCount(el, target, duration = 1000) {
   requestAnimationFrame(step);
 }
 
-/* ---------------- Trend Row Builder ---------------- */
+
+// ---------------- TREND ROW ----------------
 function createTrendRow(choice, count, maxCount) {
   const row = document.createElement("div");
   row.className = "trend-row";
@@ -65,29 +68,31 @@ function createTrendRow(choice, count, maxCount) {
   row.appendChild(left);
   row.appendChild(right);
 
-  setTimeout(() => animateCount(countEl, count), 150);
+  // animate count
+  setTimeout(() => animateCount(countEl, count, 900), 100);
 
   return row;
 }
 
-/* ---------------- GOOGLE LOGIN ---------------- */
+
+// ---------------- LOGIN ----------------
 let currentUserEmail = null;
 
 function onGoogleLogin(response) {
   const payload = decodeJwtPayload(response.credential);
   if (!payload) {
-    alert("Google login failed.");
+    alert("Login failed.");
     return;
   }
 
   currentUserEmail = payload.email;
 
-  // Swap boxes
   document.getElementById("loginBox").style.display = "none";
   document.getElementById("voteBox").style.display = "block";
 }
 
-/* ---------------- VOTE SUBMISSION (index.html) ---------------- */
+
+// ---------------- INDEX PAGE ----------------
 function handleIndexPage() {
   const voteBox = document.getElementById("voteBox");
   if (!voteBox) return;
@@ -105,10 +110,15 @@ function handleIndexPage() {
     const votes = [];
 
     sections.forEach(sec => {
-      const cat = sec.querySelector("h3").textContent.trim();
-      const choice = sec.querySelector("select").value;
-      votes.push({ category: cat, choice });
+      const category = sec.querySelector("h3")?.textContent.trim();
+      const choice = sec.querySelector("select")?.value;
+      if (category && choice) votes.push({ category, choice });
     });
+
+    if (votes.length === 0) {
+      alert("No votes selected.");
+      return;
+    }
 
     try {
       submitBtn.disabled = true;
@@ -123,117 +133,63 @@ function handleIndexPage() {
       const json = await res.json();
 
       if (json.status === "success") {
-        successMessage.classList.remove("hidden");
         successMessage.classList.add("show");
+        successMessage.classList.remove("hidden");
         submitBtn.textContent = "Submitted ✓";
 
         setTimeout(() => {
           successMessage.classList.remove("show");
-          successMessage.classList.add("hidden");
           submitBtn.disabled = false;
           submitBtn.textContent = "Submit Votes";
-        }, 2200);
+        }, 2000);
       } else {
-        throw new Error(json.message || "Unknown error");
+        throw new Error(json.message);
       }
     } catch (err) {
       console.error("Submit error:", err);
-      alert("Failed to submit votes: " + err.message);
+      alert("Failed to submit votes: " + err);
       submitBtn.disabled = false;
       submitBtn.textContent = "Submit Votes";
     }
   });
 }
 
-/* ---------------- TOTALS PAGE (totals.html) ---------------- */
+
+// ---------------- TOTALS PAGE ----------------
 function handleTotalsPage() {
   const resultsContainer = document.getElementById("resultsContainer");
   if (!resultsContainer) return;
 
-  const header = document.createElement("div");
-  header.className = "results-header";
-  header.innerHTML = `
-      <label for="categoryFilter">Filter:</label>
-      <select id="categoryFilter">
-          <option value="__ALL__">All</option>
-      </select>
-  `;
+  const headerRow = document.createElement("div");
+  headerRow.className = "results-header";
 
-  const list = document.createElement("div");
-  list.id = "resultsList";
+  const filterLabel = document.createElement("label");
+  filterLabel.textContent = "Filter by category:";
 
-  resultsContainer.appendChild(header);
-  resultsContainer.appendChild(list);
+  const filterSelect = document.createElement("select");
+  filterSelect.id = "categoryFilter";
+  filterSelect.innerHTML = `<option value="__ALL__">All Categories</option>`;
 
-  const filter = header.querySelector("#categoryFilter");
+  headerRow.appendChild(filterLabel);
+  headerRow.appendChild(filterSelect);
+  resultsContainer.appendChild(headerRow);
+
+  const listWrap = document.createElement("div");
+  listWrap.id = "resultsList";
+  resultsContainer.appendChild(listWrap);
 
   async function fetchTotals() {
     try {
       const res = await fetch(WEB_APP_URL);
       const totals = await res.json();
-
       renderTotals(totals);
       updateFilter(Object.keys(totals));
-    } catch (e) {
-      console.error(e);
-      list.innerHTML = `<p>Failed to load results.</p>`;
+    } catch (err) {
+      listWrap.innerHTML = `<p class="muted">Failed to load results.</p>`;
     }
   }
 
   function updateFilter(cats) {
-    cats.forEach(c => {
-      if (![...filter.options].some(o => o.value === c)) {
+    cats.forEach(cat => {
+      if (!Array.from(filterSelect.options).some(o => o.value === cat)) {
         const opt = document.createElement("option");
-        opt.value = c;
-        opt.textContent = c;
-        filter.appendChild(opt);
-      }
-    });
-  }
-
-  function renderTotals(totals) {
-    list.innerHTML = "";
-
-    const selected = filter.value;
-    const catsToShow = selected === "__ALL__" ? Object.keys(totals) : [selected];
-
-    let globalMax = 1;
-    Object.values(totals).forEach(cat => {
-      Object.values(cat).forEach(count => {
-        if (count > globalMax) globalMax = count;
-      });
-    });
-
-    catsToShow.forEach(cat => {
-      const block = document.createElement("div");
-      block.className = "results-category";
-
-      block.innerHTML = `<h3>${cat}</h3>`;
-
-      const entries = Object.entries(totals[cat] || {}).sort((a, b) => b[1] - a[1]);
-
-      if (entries.length === 0) {
-        block.innerHTML += `<p>No votes yet.</p>`;
-      } else {
-        entries.forEach(([choice, count]) => {
-          block.appendChild(createTrendRow(choice, count, globalMax));
-        });
-      }
-
-      list.appendChild(block);
-    });
-  }
-
-  filter.addEventListener("change", fetchTotals);
-
-  fetchTotals();
-  setInterval(fetchTotals, 7000); // FIXED
-}
-
-/* ---------------- INIT ---------------- */
-document.addEventListener("DOMContentLoaded", () => {
-  handleIndexPage();
-  handleTotalsPage();
-});
-
-window.onGoogleLogin = onGoogleLogin;
