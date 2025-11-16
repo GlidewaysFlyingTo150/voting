@@ -1,148 +1,90 @@
-console.log("Script loaded.");
-
-// ==========================
-// GOOGLE LOGIN
-// ==========================
-
 let userEmail = null;
 
-// This MUST match the callback name in your HTML (data-callback)
-function onGoogleLogin(response) {
-    try {
-        console.log("Google response:", response);
+// Handle Google login
+function handleCredentialResponse(response) {
+  const payload = JSON.parse(atob(response.credential.split(".")[1]));
+  userEmail = payload.email;
 
-        const jwt = response.credential;
-        const payload = JSON.parse(atob(jwt.split(".")[1]));
-
-        userEmail = payload.email;
-        console.log("Logged in as:", userEmail);
-
-        // Switch UI
-        document.getElementById("loginBox").style.display = "none";
-        document.getElementById("voteBox").style.display = "block";
-
-    } catch (err) {
-        console.error("LOGIN ERROR:", err);
-        alert("Google login failed. Check console.");
-    }
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("voteBox").style.display = "block";
+  document.getElementById("welcomeText").innerText = `Welcome, ${userEmail}`;
 }
 
+// Initialize Google One Tap
 window.onload = function () {
-    try {
-        google.accounts.id.initialize({
-            client_id: "232951174632-hkb769otpi9k5re4avti8mv3vamsg7hk.apps.googleusercontent.com",
-            callback: onGoogleLogin
-        });
+  google.accounts.id.initialize({
+    client_id: "232951174632-hkb769otpi9k5re4avti8mv3vamsg7hk.apps.googleusercontent.com",
+    callback: handleCredentialResponse,
+    auto_select: false
+  });
 
-        google.accounts.id.renderButton(
-            document.getElementById("googleButton"),
-            {
-                theme: "outline",     // white button
-                size: "large",
-                width: 260
-            }
-        );
-
-        console.log("Google button initialized.");
-    } catch (err) {
-        console.error("GOOGLE INIT ERROR:", err);
-    }
+  google.accounts.id.renderButton(
+    document.getElementById("googleButton"),
+    { theme: "outline", size: "large", width: 260 }
+  );
 };
 
+// Voting submit
+document.getElementById("submitVote").addEventListener("click", async function () {
+  if (!userEmail) {
+    alert("You must log in first!");
+    return;
+  }
 
-// ==========================
-// SUBMIT VOTE
-// ==========================
+  // Collect votes
+  const categories = [
+    { id: "cat-cafe", name: "Cafe / Restaurant" },
+    { id: "cat-aviation", name: "Aviation" },
+    { id: "cat-active", name: "Most Active" },
+    { id: "cat-enthusiastic", name: "Most Enthusiastic" },
+    { id: "cat-known", name: "Most Known" },
+    { id: "cat-favorite", name: "People's Favorite" },
+    { id: "cat-overall", name: "Overall" }
+  ];
 
-document.getElementById("submitVote").addEventListener("click", async () => {
-    console.log("Submit clicked.");
+  const votes = [];
+  const missing = [];
 
-    if (!userEmail) {
-        alert("You must sign in first.");
-        console.error("Submit blocked: no email.");
-        return;
+  categories.forEach(cat => {
+    const el = document.getElementById(cat.id);
+    if (el && el.value) {
+      votes.push({ category: cat.name, choice: el.value });
+    } else {
+      missing.push(cat.name);
     }
+  });
 
-    // Collect categories
-    const votes = [
-        { category: "Cafe / Restaurant", choice: document.getElementById("cat-cafe").value },
-        { category: "Aviation",          choice: document.getElementById("cat-aviation").value },
-        { category: "Most Active",       choice: document.getElementById("cat-active").value },
-        { category: "Most Enthusiastic", choice: document.getElementById("cat-enthusiastic").value },
-        { category: "Most Known",        choice: document.getElementById("cat-known").value },
-        { category: "People's Favorite", choice: document.getElementById("cat-favorite").value },
-        { category: "Overall",           choice: document.getElementById("cat-overall").value }
-    ];
+  if (missing.length > 0) {
+    alert("Please pick an option for: " + missing.join(", "));
+    console.error("Missing categories: ", missing);
+    return;
+  }
 
-    console.log("Votes object:", votes);
+  document.getElementById("loadingSpinner").style.display = "block";
 
-    // Check empty fields
-    const missing = votes.filter(v => v.choice === "");
-    if (missing.length > 0) {
-        alert("Please select an option for every category.");
-        console.warn("Missing categories:", missing);
-        return;
+  try {
+    const res = await fetch(
+      "https://script.google.com/macros/s/AKfycbwJklZ2sMbKJ6gCnmIvF7FJECSryGNX4xBHE10U42jq-pHTO9rj1GOvJG5cMf2BcP9k/exec",
+      {
+        method: "POST",
+        body: JSON.stringify({ email: userEmail, votes }),
+        headers: { "Content-Type": "application/json" }
+      }
+    );
+
+    const data = await res.json();
+    document.getElementById("loadingSpinner").style.display = "none";
+
+    if (data.status === "success") {
+      document.getElementById("successMessage").classList.add("show");
+      setTimeout(() => document.getElementById("successMessage").classList.remove("show"), 2500);
+    } else {
+      console.error("VOTE SUBMIT ERROR:", data);
+      alert("Vote submission failed: " + JSON.stringify(data));
     }
-
-    // Show spinner
-    document.getElementById("successMessage").innerText = "Submitting...";
-    document.getElementById("successMessage").classList.add("show");
-
-    try {
-        console.log("Sending POST to GAS…");
-
-        const response = await fetch(
-            "https://script.google.com/macros/s/AKfycbwJklZ2sMbKJ6gCnmIvF7FJECSryGNX4xBHE10U42jq-pHTO9rj1GOvJG5cMf2BcP9k/exec",
-            {
-                method: "POST",
-                mode: "cors",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    email: userEmail,
-                    votes: votes
-                })
-            }
-        ).catch(err => {
-            console.error("FETCH ERROR:", err);
-            throw new Error("Browser blocked: CORS or network error.");
-        });
-
-        console.log("RAW response:", response);
-
-        const text = await response.text();
-        console.log("Server returned:", text);
-
-        let json;
-        try {
-            json = JSON.parse(text);
-        } catch (parseErr) {
-            console.error("JSON PARSE ERROR:", parseErr);
-            throw new Error("Server returned non-JSON. Check Apps Script logs.");
-        }
-
-        if (json.status !== "success") {
-            throw new Error("Server error: " + JSON.stringify(json));
-        }
-
-        // Success animation
-        document.getElementById("successMessage").innerText = "Votes Submitted ✔️";
-
-        setTimeout(() => {
-            document.getElementById("successMessage").classList.remove("show");
-        }, 2000);
-
-    } catch (err) {
-        console.error("VOTE SUBMIT ERROR:", err);
-
-        document.getElementById("successMessage").innerText =
-            "❌ Failed: " + err.message;
-
-        setTimeout(() => {
-            document.getElementById("successMessage").classList.remove("show");
-        }, 3000);
-
-        alert("Submission failed.\n\nCheck the console for details.");
-    }
+  } catch (err) {
+    console.error("FETCH ERROR:", err);
+    alert("Vote submission failed. Check console for details.");
+    document.getElementById("loadingSpinner").style.display = "none";
+  }
 });
