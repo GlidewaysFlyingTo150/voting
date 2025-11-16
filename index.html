@@ -2,47 +2,48 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Glideways Annual Awards Voting</title>
+  <title>Glideways Awards Voting</title>
+
   <link rel="stylesheet" href="styles.css">
+
+  <!-- Google Sign-In -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
-  <link rel="icon" type="image/png" href="logo.png">
+
 </head>
 <body>
 
 <div class="container">
 
-  <!-- Login Box -->
+  <!-- LOGIN BOX -->
   <div class="card glass" id="loginBox">
-   <h1>Glideways Annual Awards </h1>
-    <h2>Please Sign in to Vote</h2>
+    <h1>Glideways Annual Awards</h1>
+    <h2>Please Sign In to Vote</h2>
+
     <div id="g_id_onload"
          data-client_id="232951174632-hkb769otpi9k5re4avti8mv3vamsg7hk.apps.googleusercontent.com"
          data-callback="onGoogleLogin">
     </div>
-    <div class="g_id_signin"
-         data-type="standard"
-         data-size="large"
-         data-theme="outline">
-    </div>
+
+    <div id="googleButton"></div>
   </div>
 
-  <!-- Voting Box -->
+
+  <!-- VOTING BOX -->
   <div class="card glass" id="voteBox" style="display:none;">
     <h1>Cast Your Votes</h1>
+    <p id="welcomeText"></p>
 
     <div class="category-section">
       <h3>Cafe/Restaurant</h3>
-      <select id="category-Cafe/Restaurant">
+      <select id="cat1">
         <option value="Cafe A">Cafe A</option>
         <option value="Cafe B">Cafe B</option>
-        <option value="Cafe C">Cafe C</option>
       </select>
     </div>
 
     <div class="category-section">
       <h3>Overall</h3>
-      <select id="category-Overall">
+      <select id="cat2">
         <option value="Nominee 1">Nominee 1</option>
         <option value="Nominee 2">Nominee 2</option>
       </select>
@@ -50,46 +51,16 @@
 
     <div class="category-section">
       <h3>Aviation</h3>
-      <select id="category-Aviation">
-        <option value="Nominee 1">Nominee 1</option>
-        <option value="Nominee 2">Nominee 2</option>
-      </select>
-    </div>
-
-    <div class="category-section">
-      <h3>Most Active</h3>
-      <select id="category-MostActive">
-        <option value="Nominee 1">Nominee 1</option>
-        <option value="Nominee 2">Nominee 2</option>
-      </select>
-    </div>
-
-    <div class="category-section">
-      <h3>Most Enthusiastic</h3>
-      <select id="category-MostEnthusiastic">
-        <option value="Nominee 1">Nominee 1</option>
-        <option value="Nominee 2">Nominee 2</option>
-      </select>
-    </div>
-
-    <div class="category-section">
-      <h3>Most Known</h3>
-      <select id="category-MostKnown">
-        <option value="Nominee 1">Nominee 1</option>
-        <option value="Nominee 2">Nominee 2</option>
-      </select>
-    </div>
-
-    <div class="category-section">
-      <h3>People's Favorite</h3>
-      <select id="category-PeoplesFavorite">
+      <select id="cat3">
         <option value="Nominee 1">Nominee 1</option>
         <option value="Nominee 2">Nominee 2</option>
       </select>
     </div>
 
     <button id="submitVote">Submit Votes</button>
-    <div id="successMessage" class="hidden">Votes Submitted ✔️</div>
+
+    <div id="loadingSpinner" class="hidden">Submitting...</div>
+    <div id="successMessage" class="hidden">Votes Submitted ✔</div>
   </div>
 
 </div>
