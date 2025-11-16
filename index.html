@@ -8,99 +8,96 @@
   <link rel="stylesheet" href="styles.css">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
+
 <body>
   <div class="page-wrap">
     <main class="card" id="mainCard">
+
       <header>
         <h1>Glideways Annual Awards</h1>
         <p class="muted small">Submissions are anonymous to the public — we only store email for verification.</p>
       </header>
+
+      <!-- LOGIN BOX -->
       <section class="box" id="loginBox">
         <h2 class="small muted">Please sign in with Google to vote</h2>
+
         <div id="googleButtonWrapper" class="g-wrapper">
           <div id="googleButton"></div>
         </div>
       </section>
 
-      <!-- Voting box -->
-      <section class="box" id="voteBox" style="display:none;">
-        <h2>Cast your votes</h2>
-        
-        <div id="welcomeText" class="small muted"></div>
+      <!-- VOTING BOX -->
+      <div class="card glass" id="voteBox" style="display:none;">
+        <h1>Cast Your Votes</h1>
 
-        <!-- Categories -->
-        <form id="voteForm" class="vote-form">
+        <div class="category-section">
+          <h3>Cafe / Restaurant</h3>
+          <select id="cat-cafe">
+            <option value="">-- Select --</option>
+            <option value="Cafe A">Cafe A</option>
+            <option value="Cafe B">Cafe B</option>
+            <option value="Cafe C">Cafe C</option>
+          </select>
+        </div>
 
-          <div class="category">
-            <label for="cafe">Cafe / Restaurant</label>
-            <select id="cafe" name="Cafe/Restaurant">
-              <option>Cafe A</option>
-              <option>Cafe B</option>
-              <option>Cafe C</option>
-            </select>
-          </div>
+        <div class="category-section">
+          <h3>Aviation</h3>
+          <select id="cat-aviation">
+            <option value="">-- Select --</option>
+            <option value="Aviation 1">Aviation 1</option>
+            <option value="Aviation 2">Aviation 2</option>
+          </select>
+        </div>
 
-          <div class="category">
-            <label for="aviation">Aviation</label>
-            <select id="aviation" name="Aviation">
-              <option>Nominee 1</option>
-              <option>Nominee 2</option>
-            </select>
-          </div>
+        <div class="category-section">
+          <h3>Most Active</h3>
+          <select id="cat-active">
+            <option value="">-- Select --</option>
+            <option value="Active 1">Active 1</option>
+            <option value="Active 2">Active 2</option>
+          </select>
+        </div>
 
-          <div class="category">
-            <label for="mostActive">Most Active</label>
-            <select id="mostActive" name="Most Active">
-              <option>Nominee 1</option>
-              <option>Nominee 2</option>
-            </select>
-          </div>
+        <div class="category-section">
+          <h3>Most Enthusiastic</h3>
+          <select id="cat-enthusiastic">
+            <option value="">-- Select --</option>
+            <option value="Enthusiastic 1">Enthusiastic 1</option>
+            <option value="Enthusiastic 2">Enthusiastic 2</option>
+          </select>
+        </div>
 
-          <div class="category">
-            <label for="mostEnthusiastic">Most Enthusiastic</label>
-            <select id="mostEnthusiastic" name="Most Enthusiastic">
-              <option>Nominee 1</option>
-              <option>Nominee 2</option>
-            </select>
-          </div>
+        <div class="category-section">
+          <h3>Most Known</h3>
+          <select id="cat-known">
+            <option value="">-- Select --</option>
+            <option value="Known 1">Known 1</option>
+            <option value="Known 2">Known 2</option>
+          </select>
+        </div>
 
-          <div class="category">
-            <label for="mostKnown">Most Known</label>
-            <select id="mostKnown" name="Most Known">
-              <option>Nominee 1</option>
-              <option>Nominee 2</option>
-            </select>
-          </div>
+        <div class="category-section">
+          <h3>People's Favorite</h3>
+          <select id="cat-favorite">
+            <option value="">-- Select --</option>
+            <option value="Favorite 1">Favorite 1</option>
+            <option value="Favorite 2">Favorite 2</option>
+          </select>
+        </div>
 
-          <div class="category">
-            <label for="peoplesFav">People's Favorite</label>
-            <select id="peoplesFav" name="People's Favorite">
-              <option>Nominee 1</option>
-              <option>Nominee 2</option>
-            </select>
-          </div>
-        
-          <div class="category">
-            <label for="overall">Overall</label>
-            <select id="overall" name="Overall">
-              <option>Nominee 1</option>
-              <option>Nominee 2</option>
-              <option>Nominee 3</option>
-            </select>
-          </div>
-          
-          <div class="actions">
-            <button type="submit" id="submitVote" class="btn primary">Submit Votes</button>
-          </div>
+        <div class="category-section">
+          <h3>Overall</h3>
+          <select id="cat-overall">
+            <option value="">-- Select --</option>
+            <option value="Overall 1">Overall 1</option>
+            <option value="Overall 2">Overall 2</option>
+          </select>
+        </div>
 
-          <!-- spinner + success -->
-          <div class="status-row">
-            <div id="loadingSpinner" class="spinner" aria-hidden="true"></div>
-            <div id="successMessage" class="success">Votes submitted ✨</div>
-          </div>
-
-        </form>
-      </section>
+        <button id="submitVote">Submit Votes</button>
+        <div id="successMessage" class="hidden">Votes Submitted ✔️</div>
+      </div>
 
     </main>
   </div>
