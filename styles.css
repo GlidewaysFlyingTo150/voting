@@ -64,6 +64,7 @@ button:hover{
 .hidden{
   display:none;
 }
+
 #loginBox {
   display: flex;
   flex-direction: column;
@@ -72,4 +73,25 @@ button:hover{
 }
 #loginBox .g_id_signin {
   margin: 12px 0; /* optional spacing */
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .card {
+    width: 100%;
+    max-width: 100%;
+    padding: 20px;
+    border-radius: 14px;
+  }
+
+  h1 { font-size: 1.4rem; }
+  h2, h3 { font-size: 1rem; }
+  select, .btn { font-size: 0.9rem; padding: 8px; }
+}
+
+/* Smaller mobile screens */
+@media (max-width: 480px) {
+  h1 { font-size: 1.2rem; }
+  h2, h3 { font-size: 0.9rem; }
+  select, .btn { font-size: 0.85rem; padding: 6px; }
 }
