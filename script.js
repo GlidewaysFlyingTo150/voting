@@ -117,25 +117,40 @@ async function handleIndexPage() {
     }
 
     // POST to Apps Script
-    try {
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Submitting...";
-      const res = await fetch(WEB_APP_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: currentUserEmail, votes })
-      });
-      const json = await res.json();
-      if (json && json.status === "success") {
-        successMessage.classList.add("show");
-        successMessage.classList.remove("hidden");
-        // small celebration animation
-        submitBtn.textContent = "Submitted ✓";
-        setTimeout(() => {
-          successMessage.classList.remove("show");
-          submitBtn.disabled = false;
-          submitBtn.textContent = "Submit Votes";
-        }, 2200);
+    t// POST to Apps Script
+try {
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Submitting...";
+
+  const res = await fetch(WEB_APP_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: currentUserEmail, votes })
+  });
+
+  const json = await res.json();
+
+  if (json && json.status === "success") {
+    successMessage.classList.add("show");
+    successMessage.classList.remove("hidden");
+
+    submitBtn.textContent = "Submitted ✓";
+
+    setTimeout(() => {
+      successMessage.classList.remove("show");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit Votes";
+    }, 2200);
+  } else {
+    throw new Error(json?.message || "Unknown error");
+  }
+
+} catch (err) {
+  console.error("Submit error:", err);
+  alert("Failed to submit votes: " + err);
+  submitBtn.disabled = false;
+  submitBtn.textContent = "Submit Votes";
+}
       } else {
         throw new Error(json && json.message ? json.message : "Unknown error");
       }
@@ -148,7 +163,7 @@ async function handleIndexPage() {
   });
 }
 
-// --- TOTALS PAGE: fetch totals, render trend rows, animated counters, category filter ---
+// --- TOTALS PAGE:  totals, render trend rows, animated counters, category filter ---
 async function handleTotalsPage() {
   // presence of #resultsContainer determines totals page
   const resultsContainer = document.getElementById("resultsContainer");
@@ -249,7 +264,7 @@ async function handleTotalsPage() {
 
   // initial fetch and periodic refresh
   await fetchTotals();
-  setInterval(fetchTotals, 7000);
+  setInterval(Totals, 7000);
 }
 
 // --- Initialization: decide which page we are on ---
