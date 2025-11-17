@@ -1,6 +1,6 @@
 // ===== GLOBAL =====
 let userEmail = null;
-const SCRIPT_URL = "YOUR_SCRIPT_URL"; // not strictly needed in JS, kept for clarity
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwJklZ2sMbKJ6gCnmIvF7FJECSryGNX4xBHE10U42jq-pHTO9rj1GOvJG5cMf2BcP9k/exec"; // not strictly needed in JS, kept for clarity
 
 // ===== GOOGLE LOGIN =====
 function handleCredentialResponse(response) {
