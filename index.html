@@ -32,76 +32,87 @@
         
         <h1>Cast Your Votes</h1>
         <p id="welcomeText" class="muted small"></p>
-        <div class="category-section">
-          <h3>Cafe / Restaurant</h3>
-          <select id="cat-cafe">
-            <option value="">-- Select --</option>
-            <option value="Cafe A">Cafe A</option>
-            <option value="Cafe B">Cafe B</option>
-            <option value="Cafe C">Cafe C</option>
-          </select>
-        </div>
 
-        <div class="category-section">
-          <h3>Aviation</h3>
-          <select id="cat-aviation">
-            <option value="">-- Select --</option>
-            <option value="Aviation 1">Aviation 1</option>
-            <option value="Aviation 2">Aviation 2</option>
-          </select>
-        </div>
+        <!-- form posts to Apps Script via hidden iframe to avoid CORS -->
+        <form id="voteForm" target="hiddenFrame" action="YOUR_SCRIPT_URL" method="POST">
+          <input type="hidden" name="email" id="hiddenEmail" value="">
 
-        <div class="category-section">
-          <h3>Most Active</h3>
-          <select id="cat-active">
-            <option value="">-- Select --</option>
-            <option value="Active 1">Active 1</option>
-            <option value="Active 2">Active 2</option>
-          </select>
-        </div>
+          <div class="category-section">
+            <h3>Cafe / Restaurant</h3>
+            <select id="cat-cafe" name="cat-cafe" required>
+              <option value="">-- Select --</option>
+              <option value="Cafe A">Cafe A</option>
+              <option value="Cafe B">Cafe B</option>
+              <option value="Cafe C">Cafe C</option>
+            </select>
+          </div>
 
-        <div class="category-section">
-          <h3>Most Enthusiastic</h3>
-          <select id="cat-enthusiastic">
-            <option value="">-- Select --</option>
-            <option value="Enthusiastic 1">Enthusiastic 1</option>
-            <option value="Enthusiastic 2">Enthusiastic 2</option>
-          </select>
-        </div>
+          <div class="category-section">
+            <h3>Aviation</h3>
+            <select id="cat-aviation" name="cat-aviation" required>
+              <option value="">-- Select --</option>
+              <option value="Aviation 1">Aviation 1</option>
+              <option value="Aviation 2">Aviation 2</option>
+            </select>
+          </div>
 
-        <div class="category-section">
-          <h3>Most Known</h3>
-          <select id="cat-known">
-            <option value="">-- Select --</option>
-            <option value="Known 1">Known 1</option>
-            <option value="Known 2">Known 2</option>
-          </select>
-        </div>
+          <div class="category-section">
+            <h3>Most Active</h3>
+            <select id="cat-active" name="cat-active" required>
+              <option value="">-- Select --</option>
+              <option value="Active 1">Active 1</option>
+              <option value="Active 2">Active 2</option>
+            </select>
+          </div>
 
-        <div class="category-section">
-          <h3>People's Favorite</h3>
-          <select id="cat-favorite">
-            <option value="">-- Select --</option>
-            <option value="Favorite 1">Favorite 1</option>
-            <option value="Favorite 2">Favorite 2</option>
-          </select>
-        </div>
+          <div class="category-section">
+            <h3>Most Enthusiastic</h3>
+            <select id="cat-enthusiastic" name="cat-enthusiastic" required>
+              <option value="">-- Select --</option>
+              <option value="Enthusiastic 1">Enthusiastic 1</option>
+              <option value="Enthusiastic 2">Enthusiastic 2</option>
+            </select>
+          </div>
 
-        <div class="category-section">
-          <h3>Overall</h3>
-          <select id="cat-overall">
-            <option value="">-- Select --</option>
-            <option value="Overall 1">Overall 1</option>
-            <option value="Overall 2">Overall 2</option>
-          </select>
-        </div>
+          <div class="category-section">
+            <h3>Most Known</h3>
+            <select id="cat-known" name="cat-known" required>
+              <option value="">-- Select --</option>
+              <option value="Known 1">Known 1</option>
+              <option value="Known 2">Known 2</option>
+            </select>
+          </div>
 
-        <button id="submitVote">Submit Votes</button>
+          <div class="category-section">
+            <h3>People's Favorite</h3>
+            <select id="cat-favorite" name="cat-favorite" required>
+              <option value="">-- Select --</option>
+              <option value="Favorite 1">Favorite 1</option>
+              <option value="Favorite 2">Favorite 2</option>
+            </select>
+          </div>
+
+          <div class="category-section">
+            <h3>Overall</h3>
+            <select id="cat-overall" name="cat-overall" required>
+              <option value="">-- Select --</option>
+              <option value="Overall 1">Overall 1</option>
+              <option value="Overall 2">Overall 2</option>
+            </select>
+          </div>
+
+          <button type="submit" id="submitVote">Submit Votes</button>
+        </form>
+
+        <div id="loadingSpinner" class="hidden">⏳ Submitting...</div>
         <div id="successMessage" class="hidden">Votes Submitted ✔️</div>
       </div>
 
     </main>
   </div>
+
+  <!-- Hidden iframe for POST -->
+  <iframe name="hiddenFrame" id="hiddenFrame" style="display:none;"></iframe>
 
   <script src="script.js"></script>
 </body>
