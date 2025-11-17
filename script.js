@@ -1,5 +1,6 @@
 // ===== GLOBAL =====
 let userEmail = null;
+const SCRIPT_URL = "YOUR_SCRIPT_URL"; // not strictly needed in JS, kept for clarity
 
 // ===== GOOGLE LOGIN =====
 function handleCredentialResponse(response) {
@@ -10,16 +11,20 @@ function handleCredentialResponse(response) {
     const loginBox = document.getElementById("loginBox");
     const voteBox = document.getElementById("voteBox");
     const welcomeText = document.getElementById("welcomeText");
+    const hiddenEmail = document.getElementById("hiddenEmail");
 
     if (loginBox) loginBox.style.display = "none";
     if (voteBox) voteBox.style.display = "block";
-    if (welcomeText) welcomeText.innerText = `Welcome, ${userEmail}`;
+    if (welcomeText) welcomeText.innerText = `Welcome — ${userEmail}`;
+    if (hiddenEmail) hiddenEmail.value = userEmail;
+
+    console.log("Logged in as:", userEmail);
   } catch (err) {
     console.error("Error handling credential:", err);
   }
 }
 
-// Initialize Google One Tap safely
+// Initialize Google button safely on window.onload
 window.onload = function () {
   if (window.google && google.accounts && google.accounts.id) {
     google.accounts.id.initialize({
@@ -30,92 +35,110 @@ window.onload = function () {
 
     const googleButton = document.getElementById("googleButton");
     if (googleButton) {
-      google.accounts.id.renderButton(
-        googleButton,
-        { theme: "outline", size: "large", width: 260 }
-      );
+      google.accounts.id.renderButton(googleButton, { theme: "filled_white", size: "large", width: 260 });
     }
   } else {
-    console.error("Google Identity Services not loaded.");
+    console.warn("Google API not loaded yet.");
   }
 
-  setupVoteSubmit();
+  setupFormListener();
 };
 
-// ===== VOTE SUBMISSION =====
-function setupVoteSubmit() {
+// ===== FORM / IFRAME HANDLING =====
+function setupFormListener() {
+  const form = document.getElementById("voteForm");
   const submitBtn = document.getElementById("submitVote");
-  if (!submitBtn) return;
+  const spinner = document.getElementById("loadingSpinner");
+  const successMsg = document.getElementById("successMessage");
+  const hiddenFrame = document.getElementById("hiddenFrame");
 
-  submitBtn.addEventListener("click", async function () {
+  if (!form || !submitBtn || !hiddenFrame) {
+    console.error("Form elements missing.");
+    return;
+  }
+
+  // before submit: validate client-side and ensure hidden email set
+  form.addEventListener("submit", function (ev) {
     if (!userEmail) {
-      alert("You must log in first!");
-      return;
+      alert("You must sign in with Google first.");
+      ev.preventDefault();
+      return false;
     }
 
-    const categories = [
-      { id: "cat-cafe", name: "Cafe / Restaurant" },
-      { id: "cat-aviation", name: "Aviation" },
-      { id: "cat-active", name: "Most Active" },
-      { id: "cat-enthusiastic", name: "Most Enthusiastic" },
-      { id: "cat-known", name: "Most Known" },
-      { id: "cat-favorite", name: "People's Favorite" },
-      { id: "cat-overall", name: "Overall" }
-    ];
-
-    const votes = [];
+    // Validate selects (required attribute already present, but we add friendly message)
+    const selects = form.querySelectorAll("select");
     const missing = [];
-
-    categories.forEach(cat => {
-      const el = document.getElementById(cat.id);
-      if (el && el.value) {
-        votes.push({ category: cat.name, choice: el.value });
-      } else {
-        missing.push(cat.name);
-      }
+    selects.forEach(s => {
+      if (!s.value) missing.push(s.closest(".category-section")?.querySelector("h3")?.innerText || s.name);
     });
 
     if (missing.length > 0) {
       alert("Please pick an option for: " + missing.join(", "));
-      console.error("Missing categories:", missing);
-      return;
+      ev.preventDefault();
+      return false;
     }
 
-    const spinner = document.getElementById("loadingSpinner");
-    if (spinner) spinner.style.display = "block";
+    // show spinner
+    spinner.classList.remove("hidden");
+    successMsg.classList.add("hidden");
 
-    try {
-      const res = await fetch(
-        "https://script.google.com/macros/s/AKfycbwJklZ2sMbKJ6gCnmIvF7FJECSryGNX4xBHE10U42jq-pHTO9rj1GOvJG5cMf2BcP9k/exec",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: userEmail, votes })
-        }
-      );
+    // Ensure the hiddenEmail input is current
+    const hiddenEmail = document.getElementById("hiddenEmail");
+    if (hiddenEmail) hiddenEmail.value = userEmail;
 
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
-
-      const data = await res.json();
-
-      if (spinner) spinner.style.display = "none";
-
-      if (data.status === "success") {
-        const successMsg = document.getElementById("successMessage");
-        if (successMsg) {
-          successMsg.classList.add("show");
-          setTimeout(() => successMsg.classList.remove("show"), 2500);
-        }
-      } else {
-        console.error("VOTE SUBMIT ERROR:", data);
-        alert("Vote submission failed: " + JSON.stringify(data));
-      }
-    } catch (err) {
-      console.error("FETCH ERROR:", err);
-      alert("Vote submission failed. Check console for details.");
-      if (spinner) spinner.style.display = "none";
-    }
+    // let the form submit to the hidden iframe
+    // after iframe loads it will trigger onload below
   });
+
+  // Listen for iframe load (server response)
+  hiddenFrame.onload = function () {
+    try {
+      // Try to read the iframe content (Apps Script returns JSON) — some browsers restrict cross-origin frames,
+      // so this may fail; we rely mainly on success / duplicate responses if accessible.
+      let doc;
+      try {
+        doc = hiddenFrame.contentDocument || hiddenFrame.contentWindow.document;
+      } catch (e) {
+        // cross-origin — cannot read body, but server still processed — show generic success
+        console.warn("Could not access iframe content (cross-origin). Showing generic success.");
+        spinner.classList.add("hidden");
+        successMsg.classList.remove("hidden");
+        // optionally disable submit to prevent re-vote UI wise; actual duplicate prevention is done server-side
+        submitBtn.disabled = true;
+        return;
+      }
+
+      const bodyText = (doc && doc.body && doc.body.innerText) ? doc.body.innerText : "";
+      spinner.classList.add("hidden");
+
+      if (!bodyText) {
+        successMsg.classList.remove("hidden");
+        submitBtn.disabled = true;
+        return;
+      }
+
+      let parsed;
+      try {
+        parsed = JSON.parse(bodyText);
+      } catch (e) {
+        // If Apps Script returned HTML, try to extract JSON substring
+        const jsonMatch = bodyText.match(/\{[\s\S]*\}/);
+        parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : { status: "unknown", raw: bodyText };
+      }
+
+      if (parsed.status === "success") {
+        successMsg.classList.remove("hidden");
+        submitBtn.disabled = true;
+      } else if (parsed.status === "duplicate") {
+        alert("Our records show this email has already voted. Duplicate votes are not allowed.");
+        submitBtn.disabled = true;
+      } else {
+        alert("Vote failed: " + (parsed.message || JSON.stringify(parsed)));
+      }
+
+    } catch (err) {
+      console.error("Iframe response handling error:", err);
+      spinner.classList.add("hidden");
+    }
+  };
 }
