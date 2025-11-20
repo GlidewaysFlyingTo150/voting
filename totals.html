@@ -1,23 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Glideways Award Results</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="icon" type="image/png" href="logo.png">
+  <meta charset="UTF-8" />
+  <title>Glideways Awards — Live Totals</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f3f3f3;
+    }
+    h1 {
+      text-align: center;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 25px;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #ddd;
+      text-align: center;
+    }
+    th {
+      background: #4CAF50;
+      color: white;
+    }
+    tr:hover {
+      background: #f1f1f1;
+    }
+    #loading {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 18px;
+      color: #555;
+    }
+  </style>
 </head>
 
 <body>
-<div class="container">
-  <div class="card glass">
-    <h1>Glideways Annual Awards</h1>
-    <h2>Live Results</h2>
-    <p class="muted small">Results update automatically</p>
 
-    <div id="resultsContainer"></div>
-  </div>
-</div>
+  <h1>🏆 Glideways Award Totals</h1>
+  <div id="loading">Loading totals...</div>
 
-<script src="script.js"></script>
+  <table id="resultsTable" style="display:none;">
+    <thead>
+      <tr>
+        <th>Category</th>
+        <th>Choice</th>
+        <th>Total Votes</th>
+      </tr>
+    </thead>
+    <tbody id="resultsBody"></tbody>
+  </table>
+
+  <script>
+    // === CONFIG ===
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxtJCHVt4Gh89UgC0AX0ZTpsRF8LgIqlUQN-DaQt7gpKnZV9xb5mRVUgNN2Xh9RL1Z7/exec";
+
+    async function loadTotals() {
+      try {
+        const res = await fetch(SCRIPT_URL);
+        const data = await res.json();
+
+        if (!data || !data.rows) {
+          document.getElementById("loading").innerText =
+            "❌ Failed to load vote data.";
+          return;
+        }
+
+        const rows = data.rows; // [{category, choice}, ...]
+
+        // Count totals
+        const totals = {};
+
+        rows.forEach(r => {
+          const key = r.category + "||" + r.choice;
+
+          if (!totals[key]) totals[key] = 0;
+          totals[key]++;
+        });
+
+        // Sort categories + choices
+        const sorted = Object.entries(totals).sort();
+
+        // Build table
+        let html = "";
+        sorted.forEach(([key, count]) => {
+          const [category, choice] = key.split("||");
+
+          html += `
+            <tr>
+              <td>${category}</td>
+              <td>${choice}</td>
+              <td><b>${count}</b></td>
+            </tr>
+          `;
+        });
+
+        document.getElementById("resultsBody").innerHTML = html;
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("resultsTable").style.display = "table";
+
+      } catch (err) {
+        console.error("TOTALS ERROR:", err);
+        document.getElementById("loading").innerText =
+          "❌ Error loading totals. Check console.";
+      }
+    }
+
+    loadTotals();
+  </script>
+
 </body>
 </html>
