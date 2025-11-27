@@ -29,12 +29,12 @@
 
       <!-- VOTING BOX -->
       <div class="card glass" id="voteBox" style="display:none;">
-        
         <h1>Cast Your Votes</h1>
         <p id="welcomeText" class="muted small"></p>
 
         <!-- form posts to Apps Script via hidden iframe to avoid CORS -->
-        <form id="voteForm" target="hiddenFrame" action="YOUR_SCRIPT_URL" method="POST">
+        <form id="voteForm" target="hiddenFrame" action="https://script.google.com/macros/s/AKfycbxtJCHVt4Gh89UgC0AX0ZTpsRF8LgIqlUQN-DaQt7gpKnZV9xb5mRVUgNN2Xh9RL1Z7/exec" method="POST">
+          <input type="hidden" name="payload" id="payloadInput" value="">
           <input type="hidden" name="email" id="hiddenEmail" value="">
 
           <div class="category-section">
@@ -114,6 +114,154 @@
   <!-- Hidden iframe for POST -->
   <iframe name="hiddenFrame" id="hiddenFrame" style="display:none;"></iframe>
 
-  <script src="script.js"></script>
+<script>
+/* ===== CLIENT JS (embedded) =====
+   - Google Sign-in (GSI)
+   - Build payload before submit
+   - Receive server response via postMessage from iframe
+*/
+
+let userEmail = null;
+
+// categories in order (matching select IDs)
+const categories = [
+  { id: "cat-cafe", name: "Cafe / Restaurant" },
+  { id: "cat-aviation", name: "Aviation" },
+  { id: "cat-active", name: "Most Active" },
+  { id: "cat-enthusiastic", name: "Most Enthusiastic" },
+  { id: "cat-known", name: "Most Known" },
+  { id: "cat-favorite", name: "People's Favorite" },
+  { id: "cat-overall", name: "Overall" }
+];
+
+// safely render Google button after GIS loads
+function initGoogleButton() {
+  try {
+    if (!window.google || !google.accounts || !google.accounts.id) {
+      console.error("Google Identity Services not available yet");
+      return;
+    }
+
+    google.accounts.id.initialize({
+      client_id: "232951174632-hkb769otpi9k5re4avti8mv3vamsg7hk.apps.googleusercontent.com",
+      callback: handleCredentialResponse,
+      auto_select: false
+    });
+
+    // white filled button
+    google.accounts.id.renderButton(
+      document.getElementById("googleButton"),
+      { theme: "filled_white", size: "large", width: 260 }
+    );
+  } catch (err) {
+    console.error("initGoogleButton error:", err);
+  }
+}
+
+function handleCredentialResponse(response) {
+  try {
+    const payload = JSON.parse(atob(response.credential.split(".")[1]));
+    userEmail = payload.email;
+
+    const loginBox = document.getElementById("loginBox");
+    const voteBox = document.getElementById("voteBox");
+    const welcomeText = document.getElementById("welcomeText");
+    const hiddenEmail = document.getElementById("hiddenEmail");
+
+    if (loginBox) loginBox.style.display = "none";
+    if (voteBox) voteBox.style.display = "block";
+    if (welcomeText) welcomeText.innerText = `Welcome, ${userEmail}`;
+    if (hiddenEmail) hiddenEmail.value = userEmail;
+  } catch (err) {
+    console.error("handleCredentialResponse error:", err);
+  }
+}
+
+// Wait for GIS script to load, then init button
+window.addEventListener("load", () => {
+  // try a few times if GIS not ready (rare race)
+  let tries = 0;
+  const start = () => {
+    tries++;
+    if (window.google && google.accounts && google.accounts.id) {
+      initGoogleButton();
+    } else if (tries < 10) {
+      setTimeout(start, 300);
+    } else {
+      console.error("Google Identity Services did not load.");
+    }
+  };
+  start();
+});
+
+// before form submit: validate and put JSON payload in hidden field
+const voteForm = document.getElementById("voteForm");
+const payloadInput = document.getElementById("payloadInput");
+const spinner = document.getElementById("loadingSpinner");
+const successMessage = document.getElementById("successMessage");
+
+voteForm.addEventListener("submit", function (e) {
+  // ensure logged in
+  if (!userEmail) {
+    e.preventDefault();
+    alert("You must sign in with Google first.");
+    return;
+  }
+
+  // collect selections
+  const votes = [];
+  const missing = [];
+  categories.forEach(cat => {
+    const sel = document.getElementById(cat.id);
+    if (sel && sel.value) {
+      votes.push({ category: cat.name, choice: sel.value });
+    } else {
+      missing.push(cat.name);
+    }
+  });
+
+  if (missing.length > 0) {
+    e.preventDefault();
+    alert("Please choose an option for: " + missing.join(", "));
+    return;
+  }
+
+  // create payload JSON and set hidden field
+  const payload = { email: userEmail, votes };
+  payloadInput.value = JSON.stringify(payload);
+
+  // show spinner and let form submit to hidden iframe
+  spinner.classList.remove("hidden");
+  // response will be handled by postMessage listener below
+});
+
+// receive message from iframe (Apps Script returns a small HTML that posts to parent)
+window.addEventListener("message", function (ev) {
+  // accept messages from any origin — we will inspect structure (we could restrict origin)
+  if (!ev.data || typeof ev.data !== "object") return;
+
+  spinner.classList.add("hidden");
+
+  try {
+    const data = ev.data;
+    if (data.status === "success") {
+      successMessage.classList.remove("hidden");
+      setTimeout(() => successMessage.classList.add("hidden"), 2500);
+      // Optionally lock UI or hide voteBox
+      // document.getElementById("voteBox").style.display = "none";
+    } else if (data.status === "duplicate") {
+      alert("Our records show this email has already voted.");
+    } else if (data.status === "error") {
+      alert("Vote failed: " + (data.message || "unknown error"));
+      console.error("Vote failed:", data);
+    } else {
+      console.warn("Unknown message from iframe:", data);
+    }
+  } catch (err) {
+    console.error("Message handling error:", err);
+  }
+});
+</script>
+
 </body>
 </html>
